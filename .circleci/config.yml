@@ -97,7 +97,6 @@ workflows:
           pub-type: production
           requires:
             - pack-orb
-            - check_version
           context:
             - development
             - orb-publishing
