@@ -115,8 +115,6 @@ workflows:
           filters:
             branches:
               ignore: master
-          requires:
-            - orb-tools/lint
 
       - shellcheck/check:
           exclude: SC2148
