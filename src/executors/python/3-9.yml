@@ -1,0 +1,8 @@
+description: Python executor.
+parameters:
+  tag:
+    default: '3.9.12'
+    description: Python tag to use.
+    type: string
+docker:
+  - image: cimg/python:<< parameters.tag >>

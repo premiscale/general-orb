@@ -1,0 +1,22 @@
+description: Run pylint
+resource_class: small
+executor: python-3-10
+parameters:
+  modules_path:
+    type: string
+    description: Path to modules directory in package.
+    default: src
+  configuration_file:
+    type: string
+    description: Path to pylint configuration file
+    default: .pylintrc
+steps:
+  - checkout
+  - run:
+      name: Install dependencies
+      command: pip install -r requirements.txt
+  - run:
+      name: Pylint
+      command: |
+        pip install pylint
+        pylint --rcfile=<< parameters.configuration_file >> << parameters.modules_path >>

@@ -1,6 +1,6 @@
 description: |
   Release to PyPi. Requires a context with $PYPI_USERNAME and $API_TOKEN set.
-executor: python3-10
+executor: python-3-10
 resource_class: small
 parameters:
   user:

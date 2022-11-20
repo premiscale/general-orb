@@ -45,7 +45,7 @@ workflows:
           orb-name: bjd2385/general
           pub-type: production
           requires:
-            - pack-orb
+            - general/orb-pack
           context:
             - development
             - orb-publishing
@@ -78,7 +78,7 @@ workflows:
           orb-name: bjd2385/general
           pub-type: dev
           requires:
-            - pack-orb
+            - general/orb-pack
             - shellcheck/check
           context:
             - orb-publishing

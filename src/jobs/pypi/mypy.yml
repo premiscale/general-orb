@@ -1,0 +1,22 @@
+description: Run mypy
+executor: python-3-10
+resource_class: small
+parameters:
+  modules_path:
+    type: string
+    description: Path to modules directory in package.
+    default: src
+  configuration_file:
+    type: string
+    description: Path to mypy configuration file
+    default: .mypy.ini
+steps:
+  - checkout
+  - run:
+      name: Install dependencies
+      command: pip install -r requirements.txt
+  - run:
+      name: MyPy
+      command: |
+        pip install mypy
+        mypy --config-file << parameters.configuration_file >> << parameters.modules_path >> --python-version "$(python --version | grep -oP "[0-9].[0-9]+")"
