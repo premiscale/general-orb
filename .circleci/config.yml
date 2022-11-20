@@ -89,7 +89,7 @@ workflows:
           name: publish production orb
           enable-pr-comment: false
           vcs-type: << pipeline.project.type >>
-          orb-name: << pipeline.parameters.workspace >>/<< pipeline.parameters.orb-name >>
+          orb-name: bjd2385/general
           pub-type: production
           requires:
             - pack-orb
