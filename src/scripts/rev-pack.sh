@@ -1,4 +1,3 @@
-#! /bin/bash
 # Reverse operation of pre-pack.sh. If files exist with a prefix that matches a directory name, they'll be moved under
 # that directory, and the prefix removed.
 
