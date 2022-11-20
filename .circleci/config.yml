@@ -1,25 +1,20 @@
 version: 2.1
 
-parameters:
-  workspace:
-    type: string
-    default: bjd2385
-
-  orb-name:
-    type: string
-    default: circleci-orb-template
 
 orbs:
   orb-tools: circleci/orb-tools@11.5.0
   shellcheck: circleci/shellcheck@3.1.1
   circleci-cli: circleci/circleci-cli@0.1.9
 
+
 executors:
   default:
     docker:
       - image: cimg/base:stable
 
+
 commands: {}
+
 
 jobs:
   generate-release:
@@ -70,6 +65,7 @@ jobs:
           paths:
             - orb.yml
           root: << parameters.output-dir >>
+
 
 workflows:
   on-tag:
@@ -126,7 +122,7 @@ workflows:
           name: publish development orb
           enable-pr-comment: true
           vcs-type: << pipeline.project.type >>
-          orb-name: << pipeline.parameters.workspace >>/<< pipeline.parameters.orb-name >>
+          orb-name: bjd2385/general
           pub-type: dev
           requires:
             - pack-orb
