@@ -1,5 +1,6 @@
 {
   "name": "general-orb",
+  "private": true,
   "description": "A general CircleCI orb with helpful reusable jobs and commands",
   "repository": "https://github.com/bjd2385/general-orb",
   "license": "GPL-3-Clause",
@@ -8,7 +9,7 @@
     "install:pre-commit:mac": "brew install pre-commit",
     "install:pre-commit:pip": "pip install pre-commit",
     "orb:pack": "find src -maxdepth 1 -mindepth 1 -type d | xargs -I % basename % | xargs -I % ./scripts/pre-pack.sh src % && circleci orb pack --skip-update-check src/ > orb.yml",
-    "orb:validate": "circleci orb validate --skip-update-check orb.yml",
+    "orb:validate": "yarn orb:pack >/dev/null && circleci orb validate --skip-update-check orb.yml && yarn orb:clean >/dev/null",
     "orb:cleanup": "find src -maxdepth 1 -mindepth 1 -type d | xargs -I % basename % | xargs -I % ./scripts/rev-pack.sh src % && yes | rm orb.yml",
     "orb:clean": "yarn orb:cleanup",
     "orb:cleanup:force": "find src -maxdepth 1 -mindepth 1 -type d | xargs -I % basename % | xargs -I % ./scripts/rev-pack.sh src % true; yes | rm orb.yml",
