@@ -130,7 +130,6 @@ workflows:
           pub-type: dev
           requires:
             - pack-orb
-            - orb-tools/lint
             - shellcheck/check
           context:
             - orb-publishing
