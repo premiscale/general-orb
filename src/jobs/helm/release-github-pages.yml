@@ -37,6 +37,10 @@ parameters:
     description: Git config user.email.
     type: string
     default: $GITHUB_EMAIL
+  development-package-id:
+    description: Minor version to give development package.
+    type: string
+    default: << pipeline.number >>
 steps:
   - add_ssh_keys:
       fingerprints:
@@ -52,7 +56,7 @@ steps:
         - run:
             name: Replace chart version
             command: |
-              sed -i "s@^version:.*@version: 0.0.<< pipeline.number >>@" << parameters.chart-path >>/Chart.yaml
+              sed -i "s@^version:.*@version: 0.0.<< parameters.development-package-id >>@" << parameters.chart-path >>/Chart.yaml
   - run:
       name: 'helm: package'
       command: helm package << parameters.chart-path >> --dependency-update

@@ -1,6 +1,0 @@
-description: |
-  Command for reverse-pre-packing orbs.
-steps:
-  - run:
-      name: Reverse-pre-pack orb
-      command: << include(scripts/rev-pack.sh) >>

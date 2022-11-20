@@ -4,7 +4,7 @@ description: |
   https://github.com/CircleCI-Public/orb-tools-orb/pull/149
 executor: default
 resource_class: small
-parameters: {}
+parameters:
 steps:
   - checkout
   - circleci-cli/install
