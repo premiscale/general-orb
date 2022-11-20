@@ -108,8 +108,8 @@ workflows:
 
   on-commit:
     jobs:
-      # Run a bunch of tests against this repo
-      - orb-tools/lint
+      # # Run a bunch of tests against this repo
+      # - orb-tools/lint
 
       - pack-orb:
           filters:
