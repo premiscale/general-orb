@@ -1,7 +1,7 @@
 version: 2.1
 
 description: |
-  A collection of helpful reusable jobs for GitHub, Helm, PyPi, etc.
+  A collection of helpful reusable jobs for GitHub, Helm, PyPi, CircleCI orbs, etc.
 
 # This information will be displayed in the orb registry and is not mandatory.
 display:
@@ -10,3 +10,4 @@ display:
 
 orbs:
   helm: circleci/helm@2.0.1
+  circleci-cli: circleci/circleci-cli@0.1.9
