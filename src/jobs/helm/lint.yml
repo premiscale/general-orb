@@ -1,0 +1,14 @@
+description: |
+  Run 'helm lint' against a particular chart. Can be ran against every chart in a repo by using a matrix.
+executor: default
+resource_class: small
+parameters:
+  chart-path:
+    description: Path to Helm chart we wish to lint.
+    type: string
+    default: helm/
+steps:
+  - checkout
+  - helm/install-helm-client
+  - run:
+      command: helm lint << parameters.chart-path >>
