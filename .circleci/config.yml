@@ -85,9 +85,9 @@ workflows:
           context: github
           filters:
             branches:
-              only: master
-          requires:
-            - autoincrement-minor-tag
+              ignore: /.*/
+            tags:
+              only: /^v[0-9]+\.[0-9]+\.[0-9]+$/
 
       - orb-tools/publish:
           name: publish production orb
@@ -110,10 +110,7 @@ workflows:
   on-commit:
     jobs:
       # Run a bunch of tests against this repo
-      - orb-tools/lint:
-          filters:
-            branches:
-              ignore: master
+      - orb-tools/lint
 
       - pack-orb:
           filters:
