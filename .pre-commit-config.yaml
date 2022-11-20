@@ -9,7 +9,7 @@ repos:
       - id: check-shebang-scripts-are-executable
       - id: check-yaml
       - id: mixed-line-ending
-      - id: pretty-format-json
+      #- id: pretty-format-json
       - id: trailing-whitespace
 
   - repo: https://github.com/jumanjihouse/pre-commit-hooks

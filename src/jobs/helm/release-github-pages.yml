@@ -1,0 +1,83 @@
+description: |
+  Package and upload a Helm chart to a GitHub repository's pages branch.
+executor: default
+resource_class: small
+parameters:
+  chart-path:
+    description: Path to Helm chart we wish to package.
+    type: string
+    default: helm/
+  chart-type:
+    description: Enum of either development or production (determines whether or not to respect Chart.yaml .version-values).
+    type: enum
+    enum:
+      - development
+      - production
+    default: development
+  publish-path:
+    description: Which directory in gh-pages to publish this Helm chart.
+    type: string
+    default: charts/development
+  pages-branch:
+    description: GitHub pages branch to publish this Helm chart to.
+    type: string
+    default: gh-pages
+  git-ssh-key-fingerprint:
+    description: A r/w GitHub SSH key, associated both with the repository, project in CircleCI (make sure it's associated with the correct github.com domain name, also).
+    type: string
+  helm-repo-domain:
+    description: Chart repo URL associated with GitHub pages (e.g. https://helm.aperiodicity.com).
+    type: string
+    default: https://helm.aperiodicity.com
+  git-user:
+    description: Git config user.name.
+    type: string
+    default: $GITHUB_USER
+  git-email:
+    description: Git config user.email.
+    type: string
+    default: $GITHUB_EMAIL
+  development-package-id:
+    description: Minor version to give development package.
+    type: string
+    default: << pipeline.number >>
+steps:
+  - add_ssh_keys:
+      fingerprints:
+        - "<< parameters.git-ssh-key-fingerprint >>"
+  - checkout
+  - helm/install-helm-client
+  - when:
+      condition:
+        equal:
+          - << parameters.chart-type >>
+          - development
+      steps:
+        - run:
+            name: Replace chart version
+            command: |
+              sed -i "s@^version:.*@version: 0.0.<< parameters.development-package-id >>@" << parameters.chart-path >>/Chart.yaml
+  - run:
+      name: 'helm: package'
+      command: helm package << parameters.chart-path >> --dependency-update
+  - run:
+      name: 'helm: upload'
+      command: |
+        git add *.tgz
+        git stash push *.tgz
+        git reset --hard
+        git checkout << parameters.pages-branch >>
+        git stash apply
+        mv *.tgz << parameters.publish-path >>
+  - run:
+      name: 'helm: index'
+      command: helm repo index --url << parameters.helm-repo-domain >>/<< parameters.publish-path >> << parameters.publish-path >> --merge << parameters.publish-path >>/index.yaml
+  - run:
+      name: 'Push changes: << parameters.pages-branch >>'
+      command: |
+        git config --global user.email "<< parameters.git-email >>"
+        git config --global user.name "<< parameters.git-user >>"
+        git reset
+        git add << parameters.publish-path >>/*
+        git commit -m "Upload Helm artifact"
+        git push

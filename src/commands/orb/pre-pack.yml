@@ -1,0 +1,6 @@
+description: |
+  Command for pre-packing orbs.
+steps:
+  - run:
+      name: Pre-pack orb
+      command: << include(scripts/pre-pack.sh) >>
