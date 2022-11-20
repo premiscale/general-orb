@@ -1,0 +1,8 @@
+description: Docker build / machine executor.
+parameters:
+  tag:
+    default: 2204:2022.07.1
+    description: Ubuntu version string to use.
+    type: string
+machine:
+  image: ubuntu-<< parameters.tag >>
