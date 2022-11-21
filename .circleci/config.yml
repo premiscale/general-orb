@@ -57,7 +57,7 @@ jobs:
             }
 
             export -f pre-pack
-            find src/ -maxdepth 1 -mindepth 1 -type d -print0 | xargs  --null -I % basename % | xargs --null -I % bash -c 'pre-pack src/%'
+            find src/ -maxdepth 1 -mindepth 1 -type d -print0 | xargs  --null -I % basename % | while read subdir; do pre-pack "src/${subdir}"; done
             mkdir -p dist/
             circleci orb pack --skip-update-check src/ > dist/orb.yml
 
