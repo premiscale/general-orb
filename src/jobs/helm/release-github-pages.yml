@@ -38,8 +38,9 @@ parameters:
     type: string
     default: $GITHUB_EMAIL
   development-package-id:
-    description: Minor version to give development package.
+    description: Minor version to give development package (irrelevant for production; could be set to \<< pipeline.number >>).
     type: string
+    default: ''
 steps:
   - add_ssh_keys:
       fingerprints:
