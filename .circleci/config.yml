@@ -105,7 +105,7 @@ workflows:
       # # Run a bunch of tests against this repo
       # - orb-tools/lint
 
-      - general/orb-pack:
+      - orb-pack:
           filters:
             branches:
               ignore: master
@@ -123,7 +123,7 @@ workflows:
           orb-name: bjd2385/general
           pub-type: dev
           requires:
-            - general/orb-pack
+            - orb-pack
             - shellcheck/check
           context:
             - orb-publishing
