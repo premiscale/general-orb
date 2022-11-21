@@ -22,13 +22,13 @@ parameters:
     description: GitHub pages branch to publish this Helm chart to.
     type: string
     default: gh-pages
-  git-ssh-key-fingerprint:
-    description: A r/w GitHub SSH key, associated both with the repository, project in CircleCI (make sure it's associated with the correct github.com domain name, also).
-    type: string
   helm-repo-domain:
     description: Chart repo URL associated with GitHub pages (e.g. https://helm.aperiodicity.com).
     type: string
     default: https://helm.aperiodicity.com
+  git-ssh-key-fingerprint:
+    description: A r/w GitHub SSH key, associated both with the repository, project in CircleCI (make sure it's associated with the correct github.com domain name, also).
+    type: strings
   git-user:
     description: Git config user.name.
     type: string
