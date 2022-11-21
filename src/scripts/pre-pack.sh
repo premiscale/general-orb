@@ -20,7 +20,7 @@ pre-pack()
                 fi
             done
         else
-            printf "INFO: Ignoring '%s', module is empty.\\n" "${SRC}/${TYP}/${d}"
+            printf "INFO: Ignoring '%s', module is empty.\\n" "${d}"
         fi
     done
 
@@ -29,6 +29,7 @@ pre-pack()
     return 0
 }
 
-find src/ -maxdepth 1 -mindepth 1 -type d -print0 | xargs -I % basename % | xargs -I % pre-pack src/%
+export -f pre-pack
+cd src/ || exit 1 && find . -maxdepth 1 -mindepth 1 -type d -print0 | xargs --null -I % basename % | while read -r subdir; do pre-pack "${subdir}"; done && cd ../
 mkdir -p dist/
 circleci orb pack --skip-update-check src/ > dist/orb.yml

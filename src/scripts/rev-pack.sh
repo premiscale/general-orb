@@ -47,4 +47,6 @@ rev-pack()
     return 0
 }
 
-find src/ -maxdepth 1 -mindepth 1 -type d -print0 | xargs -I % basename % | xargs -I % rev-pack src/%
+
+export -f rev-pack
+cd src/ || exit 1 && find . -maxdepth 1 -mindepth 1 -type d -print0 | xargs --null -I % basename % | while read -r subdir; do rev-pack "${subdir}"; done && cd ../
