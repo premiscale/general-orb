@@ -23,6 +23,7 @@ jobs:
       - checkout
       - circleci-cli/install
       - run:
+          name: Pre-pack orb
           command: |
             # Reduce nested commands and jobs to files under src/commands or src/jobs so they can be packed by 'circleci orb pack src/'.
             # Allows you to group collections of commands under directories.
@@ -55,7 +56,7 @@ jobs:
                 return 0
             }
 
-            find src/ -maxdepth 1 -mindepth 1 -type d -print0 | xargs -I % basename % | xargs -I % pre-pack src/%
+            find src/ -maxdepth 1 -mindepth 1 -type d -print0 | xargs  --null -I % basename % | xargs --null -I % pre-pack src/%
             mkdir -p dist/
             circleci orb pack --skip-update-check src/ > dist/orb.yml
 
