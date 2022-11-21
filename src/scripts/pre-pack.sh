@@ -30,6 +30,6 @@ pre-pack()
 }
 
 export -f pre-pack
-cd src/ || exit 1 && find . -maxdepth 1 -mindepth 1 -type d -print0 | xargs  --null -I % basename % | while read subdir; do pre-pack "${subdir}"; done && cd ../
+cd src/ || exit 1 && find . -maxdepth 1 -mindepth 1 -type d -print0 | xargs --null -I % basename % | while read -r subdir; do pre-pack "${subdir}"; done && cd ../
 mkdir -p dist/
 circleci orb pack --skip-update-check src/ > dist/orb.yml
