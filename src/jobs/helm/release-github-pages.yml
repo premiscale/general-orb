@@ -40,7 +40,6 @@ parameters:
   development-package-id:
     description: Minor version to give development package.
     type: string
-    default: << pipeline.number >>
 steps:
   - add_ssh_keys:
       fingerprints:
