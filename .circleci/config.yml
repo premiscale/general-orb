@@ -47,7 +47,7 @@ jobs:
                             fi
                         done
                     else
-                        printf "INFO: Ignoring '%s', module is empty.\\n" "${SRC}/${TYP}/${d}"
+                        printf "INFO: Ignoring '%s', module is empty.\\n" "${d}"
                     fi
                 done
 
@@ -57,7 +57,6 @@ jobs:
             }
 
             export -f pre-pack
-
             find src/ -maxdepth 1 -mindepth 1 -type d -print0 | xargs  --null -I % basename % | xargs --null -I % bash -c 'pre-pack src/%'
             mkdir -p dist/
             circleci orb pack --skip-update-check src/ > dist/orb.yml
