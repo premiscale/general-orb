@@ -1,8 +1,18 @@
 description: |
   Run 'helm lint' against a particular chart. Can be ran against every chart in a repo by using a matrix.
 executor: default
-resource_class: small
+resource_class: << parameters.resource-class >>
 parameters:
+  resource-class:
+    type: enum
+    enum:
+      - small
+      - medium
+      - large
+      - xlarge
+      - 2xlarge
+    default: small
+    description: Resource class to run as.
   chart-path:
     description: Path to Helm chart we wish to lint.
     type: string

@@ -1,8 +1,18 @@
 description: |
   Package and upload a Helm chart to a GitHub repository's pages branch.
 executor: default
-resource_class: small
+resource_class: << parameters.resource-class >>
 parameters:
+  resource-class:
+    type: enum
+    enum:
+      - small
+      - medium
+      - large
+      - xlarge
+      - 2xlarge
+    default: small
+    description: Resource class to run as.
   chart-path:
     description: Path to Helm chart we wish to package.
     type: string

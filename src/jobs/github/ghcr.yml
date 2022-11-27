@@ -2,9 +2,19 @@ description: |
   Build and push Docker containers to the GitHub Container Registry (ghcr.io).
 
   Requires a context with $GITHUB_TOKEN and $GITHUB_USER set to authenticate.
-resource_class: medium
 executor: machine
+resource_class: << parameters.resource-class >>
 parameters:
+  resource-class:
+    type: enum
+    enum:
+      - small
+      - medium
+      - large
+      - xlarge
+      - 2xlarge
+    default: small
+    description: Resource class to run as.
   image-name:
     description: Name of the image.
     default: ''
