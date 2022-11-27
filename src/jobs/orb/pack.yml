@@ -3,8 +3,18 @@ description: |
 
   https://github.com/CircleCI-Public/orb-tools-orb/pull/149
 executor: default
-resource_class: small
+resource_class: << parameters.resource-class >>
 parameters:
+  resource-class:
+    type: enum
+    enum:
+      - small
+      - medium
+      - large
+      - xlarge
+      - 2xlarge
+    default: small
+    description: Resource class to run as.
 steps:
   - checkout
   - circleci-cli/install

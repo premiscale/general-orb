@@ -1,0 +1,34 @@
+description: |
+  Validate YAML schema with Yamale.
+
+  https://github.com/23andMe/Yamale
+executor: python-3-10
+resource_class: << parameters.resource-class >>
+parameters:
+  resource-class:
+    type: enum
+    enum:
+      - small
+      - medium
+      - large
+      - xlarge
+      - 2xlarge
+    default: small
+    description: Resource class to run as.
+  schema-path:
+    type: string
+    default: config/schema.yaml
+    description: Path to the schema file to validate with Yamale.
+  path:
+    type: string
+    default: .
+    description: Path containing YAML files to validate.
+steps:
+  - run:
+      name: Install yamale
+      command: pip install yamale
+  - checkout
+  - run:
+      name: Validate Yamale schema
+      command: |
+        yamale << parameters.path >> -s << parameters.schema-path >>

@@ -1,6 +1,18 @@
 description: |
   Generate GitHub releases automatically when a repository is tagged. Requires a context with $GITHUB_TOKEN set.
+executor: default
+resource_class: << parameters.resource-class >>
 parameters:
+  resource-class:
+    type: enum
+    enum:
+      - small
+      - medium
+      - large
+      - xlarge
+      - 2xlarge
+    default: small
+    description: Resource class to run as.
   gh-version:
     description: |
       Version of the GitHub (gh) CLI to install.
@@ -12,8 +24,6 @@ parameters:
     description: GitHub token to use with the gh-client.
     type: string
     default: $GITHUB_TOKEN
-executor: default
-resource_class: small
 steps:
   - checkout
   - run:
