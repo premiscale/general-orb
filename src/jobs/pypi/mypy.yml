@@ -1,7 +1,17 @@
 description: Run mypy
 executor: python-3-10
-resource_class: small
+resource_class: << parameters.resource-class >>
 parameters:
+  resource-class:
+    type: enum
+    enum:
+      - small
+      - medium
+      - large
+      - xlarge
+      - 2xlarge
+    default: small
+    description: Resource class to run as.
   modules_path:
     type: string
     description: Path to modules directory in package.

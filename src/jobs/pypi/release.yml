@@ -1,8 +1,18 @@
 description: |
   Release to PyPi. Requires a context with $PYPI_USERNAME and $API_TOKEN set.
 executor: python-3-10
-resource_class: small
+resource_class: << parameters.resource-class >>
 parameters:
+  resource-class:
+    type: enum
+    enum:
+      - small
+      - medium
+      - large
+      - xlarge
+      - 2xlarge
+    default: small
+    description: Resource class to run as.
   user:
     description: PyPi username.
     type: string
