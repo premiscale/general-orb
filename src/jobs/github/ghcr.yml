@@ -12,7 +12,7 @@ parameters:
       - large
       - xlarge
       - 2xlarge
-    default: small
+    default: medium
     description: Resource class to run as.
   image-name:
     description: Name of the image.
