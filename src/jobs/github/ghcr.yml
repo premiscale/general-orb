@@ -8,7 +8,6 @@ parameters:
   resource-class:
     type: enum
     enum:
-      - small
       - medium
       - large
       - xlarge
