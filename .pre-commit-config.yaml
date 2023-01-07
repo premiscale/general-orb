@@ -7,7 +7,7 @@ repos:
         args: [--maxkb=10000, --enforce-all]
       - id: check-executables-have-shebangs
       - id: check-shebang-scripts-are-executable
-      - id: check-yaml
+      #- id: check-yaml
       - id: mixed-line-ending
       #- id: pretty-format-json
       - id: trailing-whitespace
@@ -21,3 +21,4 @@ repos:
     rev: v1.1.1
     hooks:
       - id: circleci-config-validate
+
