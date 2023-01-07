@@ -1,0 +1,67 @@
+description: |
+  Build and push Docker containers to a Nexus Container Registry.
+
+  Requires a context with Docker auth set.
+executor: machine
+resource_class: << parameters.resource-class >>
+parameters:
+  resource-class:
+    type: enum
+    enum:
+      - medium
+      - large
+      - xlarge
+      - 2xlarge
+    default: medium
+    description: Resource class to run as.
+  image-name:
+    description: Name of the image.
+    default: ''
+    type: string
+  tag:
+    description: Name of the tag for the image.
+    default: latest
+    type: string
+  commit-tag:
+    description: Whether or not to push an additional tag to the registry with the commit hash as the tag.
+    default: false
+    type: boolean
+  args:
+    description: Additional args string to add to the build command. (E.g., '--build-arg=HELLO=WORLD'.)
+    default: ''
+    type: string
+  path:
+    description: Path to the Dockerfile.
+    default: .
+    type: string
+  username:
+    description: Docker username.
+    type: string
+    default: $DOCKER_USERNAME
+  password:
+    description: Docker password.
+    type: string
+    default: $DOCKER_PASSWORD
+  nexus-domain:
+    description: Nexus URL.
+    type: string
+    default: $DOCKER_DOMAIN
+steps:
+  - checkout
+  - run:
+      name: Login to Nexus Docker registry.
+      command: |+
+        echo "<< parameters.password >>" | docker login << parameters.nexus-domain >> -u "<< parameters.username >>" --password-stdin
+  - run:
+      name: Build and push tag
+      command: |+
+        docker build << parameters.path >> -t << parameters.nexus-domain >>/<< parameters.image-name >>:<< parameters.tag >> << parameters.args >>
+        docker push << parameters.nexus-domain >>/<< parameters.image-name >>:<< parameters.tag >>
+  - when:
+      condition: << parameters.commit-tag >>
+      steps:
+        - run:
+            name: Push commit tag
+            command: |+
+              docker tag << parameters.nexus-domain >>/<< parameters.image-name >>:<< parameters.tag >> << parameters.nexus-domain >>/<< parameters.image-name >>:$CIRCLE_SHA1
+              docker push << parameters.nexus-domain >>/<< parameters.image-name >>:$CIRCLE_SHA1
