@@ -45,6 +45,7 @@ parameters:
   nexus-domain:
     description: Nexus URL.
     type: string
+    default: $DOCKER_DOMAIN
 steps:
   - checkout
   - run:
