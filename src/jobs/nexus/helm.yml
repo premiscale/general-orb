@@ -36,6 +36,7 @@ parameters:
 executor: default
 resource_class: small
 steps:
+  - checkout
   - helm/install-helm-client:
       version: << parameters.helm-version >>
   - helm-login:
@@ -43,7 +44,6 @@ steps:
       repo-name: << parameters.repo-name >>
       username: << parameters.username >>
       password: << parameters.password >>
-  - checkout
   - run:
       name: 'nexus-helm: package'
       command: |+
