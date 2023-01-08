@@ -48,13 +48,13 @@ steps:
       name: 'nexus-helm: package'
       command: |+
         if [ -n "<< parameters.version >>" ] && [ -n "<< parameters.app-version >>" ]; then
-            helm package << parameters.path >> --dependency-update --version << parameters.version >> --app-version << parameters.app-version >>
+            helm package << parameters.path >> --dependency-update --version << parameters.version >> --app-version << parameters.app-version >> --destination << parameters.path >>
         elif [ -n "<< parameters.version >>" ] && [ -z "<< parameters.app-version >>" ]; then
-            helm package << parameters.path >> --dependency-update --version << parameters.version >>
+            helm package << parameters.path >> --dependency-update --version << parameters.version >> --destination << parameters.path >>
         elif [ -z "<< parameters.version >>" ] && [ -n "<< parameters.app-version >>" ]; then
-            helm package << parameters.path >> --dependency-update --app-version << parameters.app-version >>
+            helm package << parameters.path >> --dependency-update --app-version << parameters.app-version >> --destination << parameters.path >>
         else
-            helm package << parameters.path >> --dependency-update
+            helm package << parameters.path >> --dependency-update --destination << parameters.path >>
         fi
   - run:
       name: 'nexus-helm: upload'
