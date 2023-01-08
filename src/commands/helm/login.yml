@@ -19,5 +19,5 @@ parameters:
     default: $HELM_PASSWORD
 steps:
   - run:
-      description: Login to Helm repository.
+      name: Login to Helm repository.
       command: echo "<< parameters.password >>" | helm repo add << parameters.repo-name >> << parameters.repo >> --password-stdin --username "<< parameters.username >>"
