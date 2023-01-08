@@ -1,0 +1,23 @@
+description: |+
+  Login to Helm repositories.
+parameters:
+  repo:
+    description: Nexus Helm repository URL.
+    type: string
+    default: $HELM_REPOSITORY_URL
+  repo-name:
+    description: Name to give Helm repository.
+    type: string
+    default: helm-repo
+  username:
+    description: Nexus Helm repository username.
+    type: string
+    default: $HELM_USERNAME
+  password:
+    description: Nexus Helm repository password.
+    type: string
+    default: $HELM_PASSWORD
+steps:
+  - run:
+      description: Login to Helm repository.
+      command: echo "<< parameters.password >>" | helm repo add << parameters.repo-name >> << parameters.repo >> --password-stdin --username "<< parameters.username >>"
