@@ -1,0 +1,62 @@
+description: |+
+  Publish Helm packages to Nexus hosted Helm repositories.
+parameters:
+  helm-version:
+    description: Helm version to install.
+    type: string
+    default: v3.8.2
+  version:
+    description: Version of the package to publish (helm package --version)
+    type: string
+    default: $CIRCLE_TAG
+  app-version:
+    description: Application version of the package (helm package --app-version)
+    type: string
+    default: ''
+  path:
+    description: Path of the Helm chart to package. Allows the use of matrices for multiple charts.
+    type: string
+    default: helm/
+  repo:
+    description: Nexus Helm repository URL.
+    type: string
+    default: $HELM_REPOSITORY_URL
+  repo-name:
+    description: Name to give Helm repository.
+    type: string
+    default: helm-repo
+  username:
+    description: Nexus Helm repository username.
+    type: string
+    default: $HELM_USERNAME
+  password:
+    description: Nexus Helm repository password.
+    type: string
+    default: $HELM_PASSWORD
+executor: default
+resource_class: small
+steps:
+  - helm/install-helm-client:
+      version: << parameters.helm-version >>
+  - helm-login:
+      repo: << parameters.repo >>
+      repo-name: << parameters.repo-name >>
+      username: << parameters.username >>
+      password: << parameters.password >>
+  - checkout
+  - run:
+      name: 'nexus-helm: package'
+      command: |+
+        if [ -n "<< parameters.version >>" ] && [ -n "<< parameters.app-version >>" ]; then
+            helm package << parameters.path >> --dependency-update --version << parameters.version >> --app-version << parameters.app-version >>
+        elif [ -n "<< parameters.version >>" ] && [ -z "<< parameters.app-version >>" ]; then
+            helm package << parameters.path >> --dependency-update --version << parameters.version >>
+        elif [ -z "<< parameters.version >>" ] && [ -n "<< parameters.app-version >>" ]; then
+            helm package << parameters.path >> --dependency-update --app-version << parameters.app-version >>
+        else
+            helm package << parameters.path >> --dependency-update
+        fi
+  - run:
+      name: 'nexus-helm: upload'
+      command: |+
+        curl -u "<< parameters.username >>":"<< parameters.password >>" << parameters.repo >> --upload-file << parameters.path >>/*.tgz
