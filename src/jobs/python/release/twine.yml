@@ -40,4 +40,4 @@ steps:
       name: Publish package to PyPI.
       command: |
         pip install twine
-        twine upload dist/* -u << parameters.user >> -p << parameters.token >> --repository << parameters.repository >>
+        twine upload dist/* -u << parameters.user >> -p << parameters.password >> --repository << parameters.repository >>
