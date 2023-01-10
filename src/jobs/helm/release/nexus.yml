@@ -8,7 +8,7 @@ parameters:
   version:
     description: Version of the package to publish (helm package --version)
     type: string
-    default: ''
+    default: $CIRCLE_TAG
   app-version:
     description: Application version of the package (helm package --app-version)
     type: string
