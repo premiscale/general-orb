@@ -1,7 +1,9 @@
 description: |
-  Release to PyPi. Requires a context with $PYPI_USERNAME and $API_TOKEN set.
-executor: python-3-10
+  Release to PyPi repository. Requires a context with $PYPI_USERNAME and $API_TOKEN set.
+executor: << parameters.executor >>
 resource_class: << parameters.resource-class >>
+environment:
+  TWINE_NON_INTERACTIVE: true
 parameters:
   resource-class:
     type: enum
@@ -13,14 +15,22 @@ parameters:
       - 2xlarge
     default: small
     description: Resource class to run as.
+  executor:
+    type: executor
+    default: python-3-10
+    description: Executor to use
   user:
     description: PyPi username.
     type: string
-    default: $PYPI_USERNAME
-  token:
+    default: $TWINE_USERNAME
+  password:
     description: PyPi API token.
     type: string
-    default: $API_TOKEN
+    default: $TWINE_PASSWORD
+  repository:
+    description: Repository name to upload to.
+    type: string
+    default: python
 steps:
   - checkout
   - run:
@@ -30,4 +40,4 @@ steps:
       name: Publish package to PyPI.
       command: |
         pip install twine
-        twine upload dist/* -u << parameters.user >> -p << parameters.token >>
+        twine upload dist/* -u << parameters.user >> -p << parameters.token >> --repository << parameters.repository >>
