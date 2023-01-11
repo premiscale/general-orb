@@ -54,7 +54,8 @@ steps:
       password: << parameters.password >>
   - when:
       condition:
-        - << parameters.image-tag >>
+        not:
+          equal: [<< parameters.image-tag >>, '']
       steps:
         - run:
             name: Install yq
