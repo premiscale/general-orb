@@ -25,6 +25,14 @@ parameters:
     description: Name to give Helm repository.
     type: string
     default: helm-repo
+  image-tag:
+    description: Update a Docker image tag in the chart. By default empty, do not execute this step.
+    default: ''
+    type: string
+  image-tag-path:
+    description: If path is different from .image.tag, update the path here for yq.
+    default: .image.tag
+    type: string
   username:
     description: Nexus Helm repository username.
     type: string
@@ -44,6 +52,20 @@ steps:
       repo-name: << parameters.repo-name >>
       username: << parameters.username >>
       password: << parameters.password >>
+  - when:
+      condition:
+        - << parameters.image-tag >>
+      steps:
+        - run:
+            name: Install yq
+            command: |
+              curl -sL https://github.com/mikefarah/yq/releases/download/v4.30.6/yq_linux_amd64 --out yq
+              install yq /usr/local/bin
+              rm yq
+        - run:
+            name: Update image tag
+            command: |
+              yq -i '<< parameters.image-tag-path >> = << parameters.image-tag >>' << parameters.path >>/values.yaml
   - run:
       name: 'nexus-helm: package'
       command: |+
