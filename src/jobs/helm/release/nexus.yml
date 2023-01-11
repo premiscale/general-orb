@@ -62,7 +62,6 @@ steps:
             command: |
               curl -sL https://github.com/mikefarah/yq/releases/download/v4.30.6/yq_linux_amd64 --out yq
               install yq /usr/local/bin
-              rm yq
         - run:
             name: Update image tag
             command: |
