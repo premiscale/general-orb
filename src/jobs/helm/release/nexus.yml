@@ -52,16 +52,15 @@ steps:
       repo-name: << parameters.repo-name >>
       username: << parameters.username >>
       password: << parameters.password >>
-  - when:
+  - unless:
       condition:
-        not:
-          equal: [<< parameters.image-tag >>, '']
+        equal: [<< parameters.image-tag >>, '']
       steps:
         - run:
             name: Install yq
             command: |
               curl -sL https://github.com/mikefarah/yq/releases/download/v4.30.6/yq_linux_amd64 --out yq
-              install yq /usr/local/bin
+              install --compare yq /usr/local/bin
         - run:
             name: Update image tag
             command: |
