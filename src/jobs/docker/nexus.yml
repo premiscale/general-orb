@@ -55,7 +55,7 @@ steps:
   - run:
       name: Build and push tag
       command: |+
-        docker build -t << parameters.nexus-domain >>/<< parameters.image-name >>:<< parameters.tag >> -f << parameters.path >>/Dockerfile << parameters.args >>
+        docker build << parameters.path >> -f << parameters.path >>/Dockerfile -t << parameters.nexus-domain >>/<< parameters.image-name >>:<< parameters.tag >> << parameters.args >>
         docker push << parameters.nexus-domain >>/<< parameters.image-name >>:<< parameters.tag >>
   - when:
       condition: << parameters.commit-tag >>
