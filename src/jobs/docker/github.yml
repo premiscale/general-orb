@@ -51,7 +51,7 @@ steps:
   - run:
       name: Build and push tag
       command: |+
-        docker build << parameters.path >> -t ghcr.io/<< parameters.user >>/<< parameters.image-name >>:<< parameters.tag >> << parameters.args >>
+        docker build -f << parameters.path >> -t ghcr.io/<< parameters.user >>/<< parameters.image-name >>:<< parameters.tag >> << parameters.args >>
         docker push ghcr.io/<< parameters.user >>/<< parameters.image-name >>:<< parameters.tag >>
   - when:
       condition: << parameters.commit-tag >>
