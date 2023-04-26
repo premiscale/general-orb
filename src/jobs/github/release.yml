@@ -19,7 +19,7 @@ parameters:
 
       https://github.com/cli/cli/releases
     type: string
-    default: '2.9.0'
+    default: '2.28.0'
   token:
     description: GitHub token to use with the gh-client.
     type: string
