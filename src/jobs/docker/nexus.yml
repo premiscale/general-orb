@@ -2,7 +2,9 @@ description: |
   Build and push Docker containers to a Nexus Container Registry.
 
   Requires a context with Docker auth set.
-executor: machine
+executor:
+  name: machine
+  caching: true
 resource_class: << parameters.resource-class >>
 parameters:
   resource-class:
