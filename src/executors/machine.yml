@@ -5,7 +5,7 @@ parameters:
     description: Ubuntu version string to use.
     type: string
   caching:
-    default: false
+    default: true
     description: Enable Docker layer caching
     type: boolean
 machine:
