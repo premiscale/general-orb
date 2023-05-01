@@ -4,5 +4,10 @@ parameters:
     default: 2204:2022.07.1
     description: Ubuntu version string to use.
     type: string
+  caching:
+    default: false
+    description: Enable Docker layer caching
+    type: boolean
 machine:
   image: ubuntu-<< parameters.tag >>
+  docker_layer_caching: << parameters.caching >>
