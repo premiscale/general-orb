@@ -50,11 +50,14 @@ steps:
             command: |
               _VERSION="$(grep -oiP "(?<=^version = \").*(?=\")" pyproject.toml)"
 
-              if [[ "$_VERSION" =~ ^[0-9]+.[0-9]+.[0-9]+$ ]]; then
+              if [[ "$_VERSION" =~ ^v?[0-9]+.[0-9]+.[0-9]+$ ]]; then
                   sed "s@version = \"${_VERSION}\"@version = \"<< parameters.version >>\"@" pyproject.toml > pyproject.toml.tmp
-              elif [[ "$_VERSION" =~ ^[0-9]+.[0-9]+.[0-9]+a[0-9]+$ ]]; then
+              elif [[ "$_VERSION" =~ ^v?[0-9]+.[0-9]+.[0-9]+a[0-9]+$ ]]; then
                   _VERSION_A="${_VERSION%%a*}"
                   sed "s@version = \"${_VERSION}\"@version = \"<< parameters.version >>\"@" pyproject.toml > pyproject.toml.tmp
+              else
+                  printf "Unable to substitue version, received \"%s\"\\n" "$_VERSION"
+                  exit 1
               fi
 
               mv pyproject.toml.tmp pyproject.toml
