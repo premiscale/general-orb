@@ -30,7 +30,7 @@ parameters:
     default: 1.5.1
 steps:
   - checkout
-  - install-poetry
+  - python-install-poetry
   - run:
       name: Install dependencies
       command: |
