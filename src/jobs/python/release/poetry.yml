@@ -35,11 +35,7 @@ parameters:
     type: string
     default: .pypirc
   version:
-    description: Override the version of the uploaded artifact in pyproject.toml. Mainly for development pipelines.
-    type: integer
-    default: -1
-  tag-version:
-    description: Override the version of the uploaded artifact in pyproject.toml. For tagged releases.
+    description: Override the version of the uploaded artifact in pyproject.toml.
     type: string
     default: $CIRCLE_TAG
 steps:
@@ -52,29 +48,13 @@ steps:
         - run:
             name: Update pyproject.toml version
             command: |
-              _VERSION="$(grep -oiP "(?<=version = \").*(?=\")" pyproject.toml)"
+              _VERSION="$(grep -oiP "(?<=^version = \").*(?=\")" pyproject.toml)"
 
               if [[ "$_VERSION" =~ ^[0-9]+.[0-9]+.[0-9]+$ ]]; then
-                  sed "s@version = \"${_VERSION}\"@version = \"0.0.<< parameters.version >>\"@" pyproject.toml > pyproject.toml.tmp
+                  sed "s@version = \"${_VERSION}\"@version = \"<< parameters.version >>\"@" pyproject.toml > pyproject.toml.tmp
               elif [[ "$_VERSION" =~ ^[0-9]+.[0-9]+.[0-9]+a[0-9]+$ ]]; then
                   _VERSION_A="${_VERSION%%a*}"
-                  sed "s@version = \"${_VERSION}\"@version = \"0.0.<< parameters.version >>\"@" pyproject.toml > pyproject.toml.tmp
-              fi
-
-              mv pyproject.toml.tmp pyproject.toml
-  - when:
-      condition: << parameters.tag-version >>
-      steps:
-        - run:
-            name: Update pyproject.toml version with tag version
-            command: |
-              _VERSION="$(grep -oiP "(?<=version = \").*(?=\")" pyproject.toml)"
-
-              if [[ "$_VERSION" =~ ^[0-9]+.[0-9]+.[0-9]+$ ]]; then
-                  sed "s@version = \"${_VERSION}\"@version = \"<< parameters.tag-version >>\"@" pyproject.toml > pyproject.toml.tmp
-              elif [[ "$_VERSION" =~ ^[0-9]+.[0-9]+.[0-9]+a[0-9]+$ ]]; then
-                  _VERSION_A="${_VERSION%%a*}"
-                  sed "s@version = \"${_VERSION}\"@version = \"<< parameters.tag-version >>\"@" pyproject.toml > pyproject.toml.tmp
+                  sed "s@version = \"${_VERSION}\"@version = \"<< parameters.version >>\"@" pyproject.toml > pyproject.toml.tmp
               fi
 
               mv pyproject.toml.tmp pyproject.toml
