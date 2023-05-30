@@ -28,10 +28,6 @@ steps:
   - checkout
   - python-install-poetry
   - run:
-      name: Install dependencies
-      command: |
-        poetry install || true
-  - run:
       name: MyPy
       command: |
         poetry run mypy --config-file << parameters.configuration_file >> << parameters.modules_path >> --python-version "$(python --version | grep -oP "[0-9].[0-9]+")"
