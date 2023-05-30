@@ -1,0 +1,17 @@
+description: Install poetry
+parameters:
+  poetry-version:
+    type: string
+    description: Poetry version to install.
+    default: 1.5.1
+steps:
+  - run:
+      name: Install poetry
+      command: |
+        pip install --upgrade pip
+
+        # Remove poetry from venv, install via pip.
+        sudo rm /home/circleci/.local/bin/poetry
+        pip install poetry==<< parameters.poetry-version >>
+        sudo ln -s /home/circleci/.pyenv/shims/poetry /home/circleci/.local/bin/poetry
+        poetry --version

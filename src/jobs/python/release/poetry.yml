@@ -2,6 +2,7 @@ description: twine upload
 resource_class: << parameters.resource-class >>
 environment:
   TWINE_NON_INTERACTIVE: true
+executor: << parameters.executor >>
 parameters:
   resource-class:
     type: enum
@@ -39,7 +40,7 @@ parameters:
     default: -1
 steps:
   - checkout
-  - install-poetry
+  - python-install-poetry
   - unless:
       condition:
         equal: [<< parameters.version >>, -1]
