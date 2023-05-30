@@ -30,7 +30,8 @@ parameters:
     default: 1.5.1
 steps:
   - checkout
-  - python-install-poetry
+  - python-install-poetry:
+      poetry-version: << parameters.poetry-version >>
   - run:
       name: Pylint
       command: |
