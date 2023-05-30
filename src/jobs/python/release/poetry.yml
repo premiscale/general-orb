@@ -14,8 +14,9 @@ parameters:
     default: small
     description: Resource class.
   executor:
+    description: Override default Python executor
     type: executor
-    default:
+    default: python-3-10
   user:
     description: PyPi username.
     type: string
