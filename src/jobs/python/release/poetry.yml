@@ -1,0 +1,67 @@
+description: twine upload
+resource_class: << parameters.resource-class >>
+environment:
+  TWINE_NON_INTERACTIVE: true
+parameters:
+  resource-class:
+    type: enum
+    enum:
+      - small
+      - medium
+      - large
+      - xlarge
+      - 2xlarge
+    default: small
+    description: Resource class.
+  executor:
+    type: executor
+    default:
+  user:
+    description: PyPi username.
+    type: string
+    default: $TWINE_USERNAME
+  password:
+    description: PyPi API token.
+    type: string
+    default: $TWINE_PASSWORD
+  repository:
+    description: Repository name to upload to. Must have a URL set in .pypirc.
+    type: string
+    default: python
+  config:
+    description: Location of the .pypirc-file to use.
+    type: string
+    default: .pypirc
+  version:
+    description: Override the version of the uploaded artifact in pyproject.toml. Mainly for development pipelines.
+    type: integer
+    default: -1
+steps:
+  - checkout
+  - install-poetry
+  - unless:
+      condition:
+        equal: [<< parameters.version >>, -1]
+      steps:
+        - run:
+            name: Update pyproject.toml version
+            command: |
+              _VERSION="$(grep -oiP "(?<=version = \").*(?=\")" pyproject.toml)"
+
+              if [[ "$_VERSION" =~ ^[0-9]+.[0-9]+.[0-9]+$ ]]; then
+                  sed "s@version = \"${_VERSION}\"@version = \"0.0.<< parameters.version >>\"@" pyproject.toml > pyproject.toml.tmp
+              elif [[ "$_VERSION" =~ ^[0-9]+.[0-9]+.[0-9]+a[0-9]+$ ]]; then
+                  _VERSION_A="${_VERSION%%a*}"
+                  sed "s@version = \"${_VERSION}\"@version = \"0.0.<< parameters.version >>\"@" pyproject.toml > pyproject.toml.tmp
+              fi
+
+              mv pyproject.toml.tmp pyproject.toml
+  - run:
+      name: Build package
+      command: |
+        poetry build
+  - run:
+      name: Publish package to PyPI
+      command: |
+        pip install twine
+        twine upload dist/* -u << parameters.user >> -p << parameters.password >> --repository << parameters.repository >> --non-interactive --config-file << parameters.config >>

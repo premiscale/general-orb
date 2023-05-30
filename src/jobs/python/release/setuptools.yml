@@ -35,7 +35,8 @@ steps:
   - checkout
   - run:
       name: Build package.
-      command: python setup.py sdist bdist_wheel
+      command: |
+        python setup.py sdist bdist_wheel
   - run:
       name: Publish package to PyPI.
       command: |
