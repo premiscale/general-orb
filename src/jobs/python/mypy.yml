@@ -26,11 +26,12 @@ parameters:
     default: .mypy.ini
 steps:
   - checkout
+  - install-poetry
   - run:
       name: Install dependencies
-      command: pip install -r requirements.txt
+      command: |
+        poetry install || true
   - run:
       name: MyPy
       command: |
-        pip install mypy
-        mypy --config-file << parameters.configuration_file >> << parameters.modules_path >> --python-version "$(python --version | grep -oP "[0-9].[0-9]+")"
+        poetry run mypy --config-file << parameters.configuration_file >> << parameters.modules_path >> --python-version "$(python --version | grep -oP "[0-9].[0-9]+")"
