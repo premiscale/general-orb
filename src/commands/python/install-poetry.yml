@@ -15,4 +15,3 @@ steps:
         pip install poetry==<< parameters.poetry-version >>
         sudo ln -s /home/circleci/.pyenv/shims/poetry /home/circleci/.local/bin/poetry
         poetry --version
-        poetry install --with=dev
