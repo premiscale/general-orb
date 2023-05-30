@@ -17,8 +17,8 @@ parameters:
     description: Resource class to run as.
   executor:
     type: executor
+    description: Override the version of Python.
     default: python-3-10
-    description: Executor to use
   user:
     description: PyPi username.
     type: string

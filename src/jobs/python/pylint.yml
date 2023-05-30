@@ -16,6 +16,10 @@ parameters:
     type: string
     description: Path to modules directory in package.
     default: src
+  executor:
+    type: executor
+    description: Override the version of Python.
+    default: python-3-10
   configuration_file:
     type: string
     description: Path to pylint configuration file
