@@ -29,7 +29,7 @@ parameters:
   repository:
     description: Repository name to upload to. Must have a URL set in .pypirc.
     type: string
-    default: python
+    default: ''
   pypirc-config:
     description: Location of the .pypirc-file to use.
     type: string
@@ -70,7 +70,7 @@ steps:
       command: |
         pip install twine
 
-        if [ "<< parameters.pypirc-config >>" != "" ]; then
+        if [ "<< parameters.pypirc-config >>" != "" ] || [ "<< parameters.repository >>" != "" ]; then
             twine upload dist/* -u << parameters.username >> -p << parameters.password >> --repository << parameters.repository >> --non-interactive --config-file << parameters.pypirc-config >>
         else
             twine upload dist/* -u << parameters.username >> -p << parameters.password >> --non-interactive
