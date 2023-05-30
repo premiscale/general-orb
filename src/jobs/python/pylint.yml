@@ -24,15 +24,14 @@ parameters:
     type: string
     description: Path to pylint configuration file
     default: .pylintrc
-  poetry-version:
-    type: string
-    description: Poetry version to install.
-    default: 1.5.1
 steps:
   - checkout
-  - python-install-poetry:
-      poetry-version: << parameters.poetry-version >>
+  - run:
+      name: Requirements
+      command: |
+        pip install -r requirements
   - run:
       name: Pylint
       command: |
-        poetry run pylint --rcfile=<< parameters.configuration_file >> << parameters.modules_path >>
+        pip install pylint
+        pylint --rcfile=<< parameters.configuration_file >> << parameters.modules_path >>

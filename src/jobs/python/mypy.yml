@@ -24,15 +24,14 @@ parameters:
     type: string
     description: Path to mypy configuration file
     default: .mypy.ini
-  poetry-version:
-    type: string
-    description: Poetry version to install.
-    default: 1.5.1
 steps:
   - checkout
-  - python-install-poetry:
-      poetry-version: << parameters.poetry-version >>
+  - run:
+      name: Requirements
+      command: |
+        pip install -r requirements.txt
   - run:
       name: MyPy
       command: |
-        poetry run mypy --config-file << parameters.configuration_file >> << parameters.modules_path >> --python-version "$(python --version | grep -oP "[0-9].[0-9]+")"
+        pip install mypy
+        mypy --config-file << parameters.configuration_file >> << parameters.modules_path >> --python-version "$(python --version | grep -oP "[0-9].[0-9]+")"
