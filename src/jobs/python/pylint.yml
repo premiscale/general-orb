@@ -35,9 +35,8 @@ steps:
       command: |
         pip uninstall poetry
         pip install poetry==<< parameters.poetry-version >>
-        poetry install
+        poetry install || true
   - run:
       name: Pylint
       command: |
-        pip install pylint
         pylint --rcfile=<< parameters.configuration_file >> << parameters.modules_path >>
