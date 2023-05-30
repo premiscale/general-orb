@@ -12,6 +12,10 @@ parameters:
       - 2xlarge
     default: small
     description: Resource class to run as.
+  executor:
+    type: executor
+    description: Override the version of Python.
+    default: python-3-10
   modules_path:
     type: string
     description: Path to modules directory in package.
