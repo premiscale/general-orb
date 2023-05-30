@@ -1,0 +1,77 @@
+description: twine upload
+resource_class: << parameters.resource-class >>
+environment:
+  TWINE_NON_INTERACTIVE: true
+executor: << parameters.executor >>
+parameters:
+  resource-class:
+    type: enum
+    enum:
+      - small
+      - medium
+      - large
+      - xlarge
+      - 2xlarge
+    default: small
+    description: Resource class.
+  executor:
+    description: Override default Python executor
+    type: executor
+    default: python-3-10
+  username:
+    description: PyPi username.
+    type: string
+    default: $TWINE_USERNAME
+  password:
+    description: PyPi API token.
+    type: string
+    default: $TWINE_PASSWORD
+  repository:
+    description: Repository name to upload to. Must have a URL set in .pypirc.
+    type: string
+    default: ''
+  pypirc-config:
+    description: Location of the .pypirc-file to use.
+    type: string
+    default: ''
+  version:
+    description: Override the version of the uploaded artifact in pyproject.toml.
+    type: string
+    default: $CIRCLE_TAG
+steps:
+  - checkout
+  - python-install-poetry
+  - unless:
+      condition:
+        equal: [<< parameters.version >>, -1]
+      steps:
+        - run:
+            name: Update pyproject.toml version
+            command: |
+              _VERSION="$(grep -oiP "(?<=^version = \").*(?=\")" pyproject.toml)"
+
+              if [[ "$_VERSION" =~ ^v?[0-9]+.[0-9]+.[0-9]+$ ]]; then
+                  sed "s@version = \"${_VERSION}\"@version = \"<< parameters.version >>\"@" pyproject.toml > pyproject.toml.tmp
+              elif [[ "$_VERSION" =~ ^v?[0-9]+.[0-9]+.[0-9]+a[0-9]+$ ]]; then
+                  _VERSION_A="${_VERSION%%a*}"
+                  sed "s@version = \"${_VERSION}\"@version = \"<< parameters.version >>\"@" pyproject.toml > pyproject.toml.tmp
+              else
+                  printf "Unable to substitue version, received \"%s\"\\n" "$_VERSION"
+                  exit 1
+              fi
+
+              mv pyproject.toml.tmp pyproject.toml
+  - run:
+      name: Build package
+      command: |
+        poetry build
+  - run:
+      name: Publish package to PyPI
+      command: |
+        pip install twine
+
+        if [ "<< parameters.pypirc-config >>" != "" ] || [ "<< parameters.repository >>" != "" ]; then
+            twine upload dist/* -u << parameters.username >> -p << parameters.password >> --repository << parameters.repository >> --non-interactive --config-file << parameters.pypirc-config >>
+        else
+            twine upload dist/* -u << parameters.username >> -p << parameters.password >> --non-interactive
+        fi

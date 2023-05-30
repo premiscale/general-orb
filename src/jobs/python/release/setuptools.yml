@@ -19,7 +19,7 @@ parameters:
     type: executor
     description: Override the version of Python.
     default: python-3-10
-  user:
+  username:
     description: PyPi username.
     type: string
     default: $TWINE_USERNAME
@@ -35,9 +35,10 @@ steps:
   - checkout
   - run:
       name: Build package.
-      command: python setup.py sdist bdist_wheel
+      command: |
+        python setup.py sdist bdist_wheel
   - run:
       name: Publish package to PyPI.
       command: |
         pip install twine
-        twine upload dist/* -u << parameters.user >> -p << parameters.password >> --repository << parameters.repository >>
+        twine upload dist/* -u << parameters.username >> -p << parameters.password >> --repository << parameters.repository >>

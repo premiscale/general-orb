@@ -27,8 +27,9 @@ parameters:
 steps:
   - checkout
   - run:
-      name: Install dependencies
-      command: pip install -r requirements.txt
+      name: Requirements
+      command: |
+        pip install -r requirements.txt
   - run:
       name: MyPy
       command: |
