@@ -14,5 +14,6 @@ steps:
         sudo rm /home/circleci/.local/bin/poetry
         pip install poetry==<< parameters.poetry-version >>
         sudo ln -s /home/circleci/.pyenv/shims/poetry /home/circleci/.local/bin/poetry
+        poetry config virtualenvs.create false --local
         poetry --version
         poetry install || true
