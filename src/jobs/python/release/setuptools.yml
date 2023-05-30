@@ -19,7 +19,7 @@ parameters:
     type: executor
     description: Override the version of Python.
     default: python-3-10
-  user:
+  username:
     description: PyPi username.
     type: string
     default: $TWINE_USERNAME

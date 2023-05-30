@@ -39,10 +39,10 @@ parameters:
   git-ssh-key-fingerprint:
     description: A r/w GitHub SSH key, associated both with the repository, project in CircleCI (make sure it's associated with the correct github.com domain name, also).
     type: string
-  git-user:
+  git-username:
     description: Git config user.name.
     type: string
-    default: $GITHUB_USER
+    default: $GITHUB_USERNAME
   git-email:
     description: Git config user.email.
     type: string

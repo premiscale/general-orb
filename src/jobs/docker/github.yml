@@ -40,7 +40,7 @@ parameters:
     description: GitHub token to use with the gh-client.
     type: string
     default: $GITHUB_TOKEN
-  user:
+  username:
     description: GitHub user to authenticate with ghcr.io.
     type: string
     default: $GITHUB_USERNAME
