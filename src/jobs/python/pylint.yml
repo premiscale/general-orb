@@ -29,7 +29,7 @@ steps:
   - run:
       name: Requirements
       command: |
-        pip install -r requirements
+        pip install -r requirements.txt
   - run:
       name: Pylint
       command: |
