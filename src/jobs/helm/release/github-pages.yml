@@ -86,7 +86,7 @@ steps:
       name: 'Push changes: << parameters.pages-branch >>'
       command: |
         git config --global user.email "<< parameters.git-email >>"
-        git config --global user.name "<< parameters.git-user >>"
+        git config --global user.name "<< parameters.git-username >>"
         git reset
         git add << parameters.publish-path >>/*
         git commit -m "Upload Helm artifact"

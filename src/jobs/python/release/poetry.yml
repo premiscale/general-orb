@@ -71,7 +71,7 @@ steps:
         pip install twine
 
         if [ "<< parameters.pypirc-config >>" != "" ]; then
-            twine upload dist/* -u << parameters.user >> -p << parameters.password >> --repository << parameters.repository >> --non-interactive --config-file << parameters.config >>
+            twine upload dist/* -u << parameters.username >> -p << parameters.password >> --repository << parameters.repository >> --non-interactive --config-file << parameters.pypirc-config >>
         else
-            twine upload dist/* -u << parameters.user >> -p << parameters.password >> --repository << parameters.repository >> --non-interactive
+            twine upload dist/* -u << parameters.username >> -p << parameters.password >> --repository << parameters.repository >> --non-interactive
         fi
