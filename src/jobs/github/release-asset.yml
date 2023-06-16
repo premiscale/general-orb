@@ -1,0 +1,45 @@
+description: |
+  Upload artifacts to GitHub releases after a repository has been tagged. Requires a context with $GITHUB_TOKEN set.
+executor: default
+resource_class: << parameters.resource-class >>
+parameters:
+  resource-class:
+    type: enum
+    enum:
+      - small
+      - medium
+      - large
+      - xlarge
+      - 2xlarge
+    default: small
+    description: Resource class to run as.
+  gh-version:
+    description: |
+      Version of the GitHub (gh) CLI to install.
+
+      https://github.com/cli/cli/releases
+    type: string
+    default: '2.28.0'
+  token:
+    description: GitHub token to use with the gh-client.
+    type: string
+    default: $GITHUB_TOKEN
+  cache-name:
+    description:
+steps:
+  - checkout
+  - run:
+      name: Install gh CLI
+      command: |+
+        wget https://github.com/cli/cli/releases/download/v<< parameters.gh-version >>/gh_<< parameters.gh-version >>_linux_amd64.deb -O gh.deb
+        sudo dpkg -i gh.deb
+  - run:
+      name: Generate release
+      command: |
+        # Get latest tag.
+        git fetch --all --tags
+        export LATEST_TAG="$(git tag | sort -V | tail -1)"
+        echo "$LATEST_TAG"
+        # Generate release from tag.
+        echo "<< parameters.token >>" | gh auth login --with-token 2>/dev/null || true
+        gh release upload "$LATEST_TAG" << parameters.artifact-path >>

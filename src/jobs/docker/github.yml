@@ -53,13 +53,19 @@ steps:
   - run:
       name: Build and push tag
       command: |+
-        docker build -f << parameters.path >> -t ghcr.io/<< parameters.username >>/<< parameters.image-name >>:<< parameters.tag >> << parameters.args >>
-        docker push ghcr.io/<< parameters.username >>/<< parameters.image-name >>:<< parameters.tag >>
+        if [[ "<< parameters.tag >>" =~ v[0-9]+.[0-9]+.[0-9]+ ]]; then
+            export _DOCKER_TAG="$(printf "<< parameters.tag >>" | grep -oP "(?<=v).*" | awk NF)"
+        else
+            export _DOCKER_TAG="<< parameters.tag >>"
+        fi
+
+        docker build -f << parameters.path >> -t ghcr.io/<< parameters.username >>/<< parameters.image-name >>:"$_DOCKER_TAG" << parameters.args >>
+        docker push ghcr.io/<< parameters.username >>/<< parameters.image-name >>:"$_DOCKER_TAG"
   - when:
       condition: << parameters.commit-tag >>
       steps:
         - run:
             name: Push commit tag
             command: |+
-              docker tag ghcr.io/<< parameters.username >>/<< parameters.image-name >>:<< parameters.tag >> ghcr.io/<< parameters.username >>/<< parameters.image-name >>:$CIRCLE_SHA1
+              docker tag ghcr.io/<< parameters.username >>/<< parameters.image-name >>:"$_DOCKER_TAG" ghcr.io/<< parameters.username >>/<< parameters.image-name >>:$CIRCLE_SHA1
               docker push ghcr.io/<< parameters.username >>/<< parameters.image-name >>:$CIRCLE_SHA1
