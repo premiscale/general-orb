@@ -57,14 +57,20 @@ steps:
   - run:
       name: Build and push tag
       command: |+
+        if [[ "<< parameters.tag >>" =~ v[0-9]+.[0-9]+.[0-9]+ ]]; then
+            export _DOCKER_TAG="$(printf "<< parameters.tag >>" | grep -oP "(?<=v).*" | awk NF)"
+        else
+            export _DOCKER_TAG="<< parameters.tag >>"
+        fi
+
         if [ "$(echo "<< parameters.path >>" | grep -oP "Dockerfile")" != "Dockerfile" ]; then
             # Path does not contain the dockerfile, so we default to "Dockerfile".
-            docker build . -f ./<< parameters.path >>/Dockerfile -t << parameters.nexus-domain >>/<< parameters.image-name >>:<< parameters.tag >> << parameters.args >>
-            docker push << parameters.nexus-domain >>/<< parameters.image-name >>:<< parameters.tag >>
+            docker build . -f ./<< parameters.path >>/Dockerfile -t << parameters.nexus-domain >>/<< parameters.image-name >>:"$_DOCKER_TAG" << parameters.args >>
+            docker push << parameters.nexus-domain >>/<< parameters.image-name >>:"$_DOCKER_TAG"
         else
             # Path does specify the Dockerfile explictly, don't default to "Dockerfile". E.g., "docker/Dockerfile.develop".
-            docker build . -f ./<< parameters.path >> -t << parameters.nexus-domain >>/<< parameters.image-name >>:<< parameters.tag >> << parameters.args >>
-            docker push << parameters.nexus-domain >>/<< parameters.image-name >>:<< parameters.tag >>
+            docker build . -f ./<< parameters.path >> -t << parameters.nexus-domain >>/<< parameters.image-name >>:"$_DOCKER_TAG" << parameters.args >>
+            docker push << parameters.nexus-domain >>/<< parameters.image-name >>:"$_DOCKER_TAG"
         fi
   - when:
       condition: << parameters.commit-tag >>
@@ -72,5 +78,5 @@ steps:
         - run:
             name: Push commit tag
             command: |+
-              docker tag << parameters.nexus-domain >>/<< parameters.image-name >>:<< parameters.tag >> << parameters.nexus-domain >>/<< parameters.image-name >>:$CIRCLE_SHA1
+              docker tag << parameters.nexus-domain >>/<< parameters.image-name >>:"$_DOCKER_TAG" << parameters.nexus-domain >>/<< parameters.image-name >>:$CIRCLE_SHA1
               docker push << parameters.nexus-domain >>/<< parameters.image-name >>:$CIRCLE_SHA1
