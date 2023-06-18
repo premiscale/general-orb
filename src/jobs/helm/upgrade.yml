@@ -51,7 +51,7 @@ steps:
             (
                 cd << parameters.chart-path >> || exit 1 && \
                 helm dependency build && \
-                help upgrade --install --namespace "<< parameters.namespace >>" --create-namespace "<< parameters.install-name >>" . \
+                helm upgrade --install --namespace "<< parameters.namespace >>" --create-namespace "<< parameters.install-name >>" . \
                   --values values.yaml \
                   << parameters.additional-values >>
             )
@@ -59,7 +59,7 @@ steps:
             (
                 cd << parameters.chart-path >> || exit 1 && \
                 helm dependency build && \
-                help upgrade --install --namespace "<< parameters.namespace >>" --create-namespace "<< parameters.install-name >>" . \
+                helm upgrade --install --namespace "<< parameters.namespace >>" --create-namespace "<< parameters.install-name >>" . \
                   --values values.yaml
             )
         fi
