@@ -14,7 +14,7 @@ parameters:
     description: Path to Helm chart.
   additional-values:
     type: string
-    default: ":"
+    default: ''
     description: Additional values.yaml-files to pass to helm.
   cluster:
     default: $CLUSTER
@@ -47,10 +47,19 @@ steps:
   - run:
       name:
       command: |+
-        (
-            cd << parameters.chart-path >> || exit 1 && \
-            helm dependency build && \
-            help upgrade --install --namespace "<< parameters.namespace >>" --create-namespace "<< parameters.install-name >>" . \
-              --values values.yaml \
-              << parameters.additional-values >>
-        )
+        if [ -z "<< parameters.additional-values >>" ]; then
+            (
+                cd << parameters.chart-path >> || exit 1 && \
+                helm dependency build && \
+                help upgrade --install --namespace "<< parameters.namespace >>" --create-namespace "<< parameters.install-name >>" . \
+                  --values values.yaml \
+                  << parameters.additional-values >>
+            )
+        else
+            (
+                cd << parameters.chart-path >> || exit 1 && \
+                helm dependency build && \
+                help upgrade --install --namespace "<< parameters.namespace >>" --create-namespace "<< parameters.install-name >>" . \
+                  --values values.yaml
+            )
+        fi
