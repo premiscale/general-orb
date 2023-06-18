@@ -71,12 +71,24 @@ steps:
   - run:
       name: Helm install --dry-run
       command: |+
-        if [ -z "<< parameters.additional-values >>" ]; then
-            helm upgrade --install --namespace "<< parameters.namespace >>" --create-namespace "<< parameters.install-name >>" << parameters.repo-name >>/<< parameters.project-name >> --version << parameters.version >> \
-              --values values.yaml << parameters.additional-values >> \
-              --dry-run
+        if [ -z "<< parameters.project-name >>" ]; then
+            if [ -z "<< parameters.additional-values >>" ]; then
+                helm upgrade --install --namespace "<< parameters.namespace >>" --create-namespace "<< parameters.install-name >>" << parameters.repo-name >>/<< parameters.install-name >> --version << parameters.version >> \
+                  --values values.yaml << parameters.additional-values >> \
+                  --dry-run
+            else
+                helm upgrade --install --namespace "<< parameters.namespace >>" --create-namespace "<< parameters.install-name >>" << parameters.repo-name >>/<< parameters.install-name >> --version << parameters.version >> \
+                  --values values.yaml \
+                  --dry-run
+            fi
         else
-            helm upgrade --install --namespace "<< parameters.namespace >>" --create-namespace "<< parameters.install-name >>" << parameters.repo-name >>/<< parameters.project-name >> --version << parameters.version >> \
-              --values values.yaml \
-              --dry-run
+            if [ -z "<< parameters.additional-values >>" ]; then
+                helm upgrade --install --namespace "<< parameters.namespace >>" --create-namespace "<< parameters.install-name >>" << parameters.repo-name >>/<< parameters.project-name >> --version << parameters.version >> \
+                  --values values.yaml << parameters.additional-values >> \
+                  --dry-run
+            else
+                helm upgrade --install --namespace "<< parameters.namespace >>" --create-namespace "<< parameters.install-name >>" << parameters.repo-name >>/<< parameters.project-name >> --version << parameters.version >> \
+                  --values values.yaml \
+                  --dry-run
+            fi
         fi
