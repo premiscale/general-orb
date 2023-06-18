@@ -13,7 +13,17 @@ parameters:
     default: $LOFT_URL
     type: string
     description: Loft.sh deployment's domain.
+  loft-version:
+    default: v3.2.0
+    type: string
+    description: Loft.sh CLI version to install.
 steps:
+  - run:
+      name: Install Loft.sh CLI
+      command: |+
+        curl -L -o loft "https://github.com/loft-sh/loft/releases/download/<< parameters.loft-version >>/loft-linux-amd64"
+        sudo install -c -m 0755 loft /usr/local/bin
+        rm loft
   - run:
       name: Login to Loft.sh domain
       command: |+
