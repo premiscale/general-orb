@@ -38,12 +38,12 @@ parameters:
 resource_class: << parameters.resource-class >>
 executor: << parameters.executor >>
 steps:
+  - checkout
   - loft-connect:
       cluster: << parameters.cluster >>
       loft-access-key: << parameters.loft-access-key >>
       loft-url: << parameters.loft-url >>
   - helm/install-helm-client
-  - checkout
   - run:
       name:
       command: |+
