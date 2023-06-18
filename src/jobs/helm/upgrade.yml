@@ -73,9 +73,7 @@ steps:
       name: Helm upgrade --install
       command: |+
         if [ -z "<< parameters.project-name >>" ]; then
-            helm upgrade --install --namespace "<< parameters.namespace >>" --create-namespace "<< parameters.install-name >>" << parameters.repo-name >>/<< parameters.install-name >> --version << parameters.version >> \
-              --values values.yaml << parameters.additional-values >>
+            helm upgrade --install --namespace "<< parameters.namespace >>" --create-namespace "<< parameters.install-name >>" << parameters.repo-name >>/<< parameters.install-name >> --version << parameters.version >> << parameters.additional-values >>
         else
-            helm upgrade --install --namespace "<< parameters.namespace >>" --create-namespace "<< parameters.install-name >>" << parameters.repo-name >>/<< parameters.project-name >> --version << parameters.version >> \
-              --values values.yaml << parameters.additional-values >>
+            helm upgrade --install --namespace "<< parameters.namespace >>" --create-namespace "<< parameters.install-name >>" << parameters.repo-name >>/<< parameters.project-name >> --version << parameters.version >> << parameters.additional-values >>
         fi
