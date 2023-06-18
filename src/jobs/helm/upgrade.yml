@@ -1,0 +1,65 @@
+description: |+
+  Helm upgrade --install on a cluster.
+parameters:
+  namespace:
+    default: default
+    type: string
+    description: Cluster namespace to deploy to.
+  install-name:
+    type: string
+    description: The name to give the deployment.
+  chart-path:
+    type: string
+    default: helm/
+    description: Path to Helm chart.
+  additional-values:
+    type: string
+    default: ''
+    description: Additional values.yaml-files to pass to helm.
+  cluster:
+    default: $CLUSTER
+    type: string
+    description: Cluster name to connect to.
+  loft-access-key:
+    default: $LOFT_ACCESS_KEY
+    type: string
+    description: Loft.sh access key.
+  loft-url:
+    default: $LOFT_URL
+    type: string
+    description: Loft.sh deployment's domain.
+  executor:
+    type: executor
+    default: default
+  resource-class:
+    type: enum
+    enum: [small, medium, large, xlarge, 2xlarge]
+    default: small
+resource_class: << parameters.resource-class >>
+executor: << parameters.executor >>
+steps:
+  - checkout
+  - loft-connect:
+      cluster: << parameters.cluster >>
+      loft-access-key: << parameters.loft-access-key >>
+      loft-url: << parameters.loft-url >>
+  - helm/install-helm-client
+  - run:
+      name:
+      command: |+
+        if [ -z "<< parameters.additional-values >>" ]; then
+            (
+                cd << parameters.chart-path >> || exit 1 && \
+                helm dependency build && \
+                helm upgrade --install --namespace "<< parameters.namespace >>" --create-namespace "<< parameters.install-name >>" . \
+                  --values values.yaml \
+                  << parameters.additional-values >>
+            )
+        else
+            (
+                cd << parameters.chart-path >> || exit 1 && \
+                helm dependency build && \
+                helm upgrade --install --namespace "<< parameters.namespace >>" --create-namespace "<< parameters.install-name >>" . \
+                  --values values.yaml
+            )
+        fi
