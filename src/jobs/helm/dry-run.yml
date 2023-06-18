@@ -35,15 +35,36 @@ parameters:
     type: enum
     enum: [small, medium, large, xlarge, 2xlarge]
     default: small
+  repo:
+    description: Nexus Helm repository URL.
+    type: string
+    default: $HELM_REPOSITORY_URL
+  repo-name:
+    type: string
+    default: premiscale
+    description: Repo alias (helm repo add <alias> <url>).
+  username:
+    description: Nexus Helm repository username.
+    type: string
+    default: $HELM_USERNAME
+  password:
+    description: Nexus Helm repository password.
+    type: string
+    default: $HELM_PASSWORD
 resource_class: << parameters.resource-class >>
 executor: << parameters.executor >>
 steps:
   - checkout
+  - helm/install-helm-client
+  - helm-login:
+      repo: << parameters.repo >>
+      repo-name: << parameters.repo-name >>
+      username: << parameters.username >>
+      password: << parameters.password >>
   - loft-connect:
       cluster: << parameters.cluster >>
       loft-access-key: << parameters.loft-access-key >>
       loft-url: << parameters.loft-url >>
-  - helm/install-helm-client
   - run:
       name: Helm install dry run
       command: |+

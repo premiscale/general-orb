@@ -51,6 +51,7 @@ resource_class: << parameters.resource-class >>
 executor: << parameters.executor >>
 steps:
   - checkout
+  - helm/install-helm-client
   - helm-login:
       repo: << parameters.repo >>
       repo-name: << parameters.repo-name >>
@@ -60,7 +61,6 @@ steps:
       cluster: << parameters.cluster >>
       loft-access-key: << parameters.loft-access-key >>
       loft-url: << parameters.loft-url >>
-  - helm/install-helm-client
   - run:
       name:
       command: |+
