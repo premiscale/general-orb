@@ -1,5 +1,5 @@
 description: |+
-  Helm install dry-run against a cluster.
+  Helm upgrade --install on a cluster.
 parameters:
   namespace:
     default: default
@@ -49,7 +49,6 @@ steps:
             cd << parameters.chart-path >> || exit 1 && \
             helm dependency build && \
             help upgrade --install --namespace "<< parameters.namespace >>" --create-namespace "<< parameters.install-name >>" . \
-              --dry-run \
               --values values.yaml \
               << parameters.additional-values >>
         )

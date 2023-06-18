@@ -1,5 +1,5 @@
 description: |+
-  Helm upgrade --install on a cluster.
+  Helm upgrade --install --dry-run against a cluster.
 parameters:
   namespace:
     default: default
