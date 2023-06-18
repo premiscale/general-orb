@@ -42,6 +42,7 @@ steps:
       cluster: << parameters.cluster >>
       loft-access-key: << parameters.loft-access-key >>
       loft-url: << parameters.loft-url >>
+  - helm/install-helm-client
   - checkout
   - run:
       name:
