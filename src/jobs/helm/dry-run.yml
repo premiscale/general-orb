@@ -48,19 +48,11 @@ steps:
       name: Helm install dry run
       command: |+
         if [ -z "<< parameters.additional-values >>" ]; then
-            (
-                cd << parameters.chart-path >> || exit 1 && \
-                helm dependency build && \
-                helm upgrade --install --namespace "<< parameters.namespace >>" --create-namespace "<< parameters.install-name >>" . \
-                  --values values.yaml << parameters.additional-values >> \
-                  --dry-run
-            )
+            helm upgrade --install --namespace "<< parameters.namespace >>" --create-namespace "<< parameters.install-name >>" . \
+              --values values.yaml << parameters.additional-values >> \
+              --dry-run
         else
-            (
-                cd << parameters.chart-path >> || exit 1 && \
-                helm dependency build && \
-                helm upgrade --install --namespace "<< parameters.namespace >>" --create-namespace "<< parameters.install-name >>" . \
-                  --values values.yaml \
-                  --dry-run
-            )
+            helm upgrade --install --namespace "<< parameters.namespace >>" --create-namespace "<< parameters.install-name >>" . \
+              --values values.yaml \
+              --dry-run
         fi
