@@ -42,7 +42,7 @@ parameters:
   project-name:
     description: Name of Helm chart to install from <repo-name>. Defaults to << parameters.install-name >>
     type: string
-    default: ''
+    default: $CIRCLE_PROJECT_REPONAME
   username:
     description: Nexus Helm repository username.
     type: string
