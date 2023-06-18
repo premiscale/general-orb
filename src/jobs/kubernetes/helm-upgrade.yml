@@ -1,0 +1,55 @@
+description: |+
+  Helm upgrade --install on a cluster.
+parameters:
+  namespace:
+    default: default
+    type: string
+    description: Cluster namespace to deploy to.
+  install-name:
+    type: string
+    description: The name to give the deployment.
+  chart-path:
+    type: string
+    default: helm/
+    description: Path to Helm chart.
+  additional-values:
+    type: string
+    default: ":"
+    description: Additional values.yaml-files to pass to helm.
+  cluster:
+    default: $CLUSTER
+    type: string
+    description: Cluster name to connect to.
+  loft-access-key:
+    default: $LOFT_ACCESS_KEY
+    type: string
+    description: Loft.sh access key.
+  loft-url:
+    default: $LOFT_URL
+    type: string
+    description: Loft.sh deployment's domain.
+  executor:
+    type: executor
+    default: default
+  resource-class:
+    type: enum
+    enum: [small, medium, large, xlarge, 2xlarge]
+    default: small
+resource_class: << parameters.resource-class >>
+executor: << parameters.executor >>
+steps:
+  - loft-connect:
+      cluster: << parameters.cluster >>
+      loft-access-key: << parameters.loft-access-key >>
+      loft-url: << parameters.loft-url >>
+  - run:
+      name:
+      command: |+
+        (
+            cd << parameters.chart-path >> || exit 1 && \
+            helm dependency build && \
+            help upgrade --install --namespace "<< parameters.namespace >>" --create-namespace "<< parameters.install-name >>" . \
+              --dry-run \
+              --values values.yaml \
+              << parameters.additional-values >>
+        )

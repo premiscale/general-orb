@@ -1,0 +1,24 @@
+description: |+
+  Connect to a Kubernetes cluster via the loft.sh CLI.
+parameters:
+  cluster:
+    default: $CLUSTER
+    type: string
+    description: Cluster name to connect to.
+  loft-access-key:
+    default: $LOFT_ACCESS_KEY
+    type: string
+    description: Loft.sh access key.
+  loft-url:
+    default: $LOFT_URL
+    type: string
+    description: Loft.sh deployment's domain.
+steps:
+  - run:
+      name: Login to Loft.sh domain
+      command: |+
+        loft login "<< parameters.loft-url >>" --access-key "<< parameters.loft-access-key >>"
+  - run:
+      name: Switch to cluster
+      command: |+
+        loft use cluster "<< parameters.cluster >>"
