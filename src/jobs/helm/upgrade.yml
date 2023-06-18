@@ -39,6 +39,9 @@ parameters:
     type: string
     default: premiscale
     description: Repo alias (helm repo add <alias> <url>).
+  project-name:
+    description: Name of Helm chart to install from <repo-name>.
+    type: string
   username:
     description: Nexus Helm repository username.
     type: string
@@ -47,6 +50,10 @@ parameters:
     description: Nexus Helm repository password.
     type: string
     default: $HELM_PASSWORD
+  version:
+    description: Version of the package to publish (helm package --version)
+    type: string
+    default: $CIRCLE_TAG
 resource_class: << parameters.resource-class >>
 executor: << parameters.executor >>
 steps:
@@ -62,12 +69,12 @@ steps:
       loft-access-key: << parameters.loft-access-key >>
       loft-url: << parameters.loft-url >>
   - run:
-      name:
+      name: Helm upgrade --install
       command: |+
         if [ -z "<< parameters.additional-values >>" ]; then
-            helm upgrade --install --namespace "<< parameters.namespace >>" --create-namespace "<< parameters.install-name >>"  \
+            helm upgrade --install --namespace "<< parameters.namespace >>" --create-namespace "<< parameters.install-name >>" << parameters.repo-name >>/<< parameters.project-name >> \
               --values values.yaml << parameters.additional-values >>
         else
-              helm upgrade --install --namespace "<< parameters.namespace >>" --create-namespace "<< parameters.install-name >>" . \
+              helm upgrade --install --namespace "<< parameters.namespace >>" --create-namespace "<< parameters.install-name >>" << parameters.repo-name >>/<< parameters.project-name >> \
                 --values values.yaml
         fi
