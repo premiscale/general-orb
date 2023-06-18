@@ -8,6 +8,7 @@ parameters:
   install-name:
     type: string
     description: The name to give the deployment.
+    default: $CIRCLE_PROJECT_REPONAME
   additional-values:
     type: string
     default: ''
@@ -39,10 +40,6 @@ parameters:
     type: string
     default: premiscale
     description: Repo alias (helm repo add <alias> <url>).
-  project-name:
-    description: Name of Helm chart to install from <repo-name>. Defaults to << parameters.install-name >>
-    type: string
-    default: $CIRCLE_PROJECT_REPONAME
   username:
     description: Nexus Helm repository username.
     type: string
@@ -72,8 +69,4 @@ steps:
   - run:
       name: Helm upgrade --install
       command: |+
-        if [ -z "<< parameters.project-name >>" ]; then
-            helm upgrade --install --namespace "<< parameters.namespace >>" --create-namespace "<< parameters.install-name >>" << parameters.repo-name >>/<< parameters.install-name >> --version << parameters.version >> << parameters.additional-values >>
-        else
-            helm upgrade --install --namespace "<< parameters.namespace >>" --create-namespace "<< parameters.install-name >>" << parameters.repo-name >>/<< parameters.project-name >> --version << parameters.version >> << parameters.additional-values >>
-        fi
+        helm upgrade --install --namespace "<< parameters.namespace >>" --create-namespace "<< parameters.install-name >>" << parameters.repo-name >>/<< parameters.install-name >> --version << parameters.version >> << parameters.additional-values >>
