@@ -61,7 +61,7 @@ steps:
                 cd << parameters.chart-path >> || exit 1 && \
                 helm dependency build && \
                 help upgrade --install --namespace "<< parameters.namespace >>" --create-namespace "<< parameters.install-name >>" . \
-                  --values values.yaml
+                  --values values.yaml \
                   --dry-run
             )
         fi
