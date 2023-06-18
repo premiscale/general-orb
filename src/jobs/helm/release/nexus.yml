@@ -16,15 +16,11 @@ parameters:
   path:
     description: Path of the Helm chart to package. Allows the use of matrices for multiple charts.
     type: string
-    default: helm/
+    default: helm/$CIRCLE_PROJECT_REPONAME
   repo:
     description: Nexus Helm repository URL.
     type: string
     default: $HELM_REPOSITORY_URL
-  repo-name:
-    description: Name to give Helm repository.
-    type: string
-    default: helm-repo
   image-tag:
     description: Update a Docker image tag in the chart. By default empty, do not execute this step.
     default: ''
@@ -47,11 +43,6 @@ steps:
   - checkout
   - helm/install-helm-client:
       version: << parameters.helm-version >>
-  - helm-login:
-      repo: << parameters.repo >>
-      repo-name: << parameters.repo-name >>
-      username: << parameters.username >>
-      password: << parameters.password >>
   - unless:
       condition:
         equal: [<< parameters.image-tag >>, '']

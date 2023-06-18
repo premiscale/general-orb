@@ -8,10 +8,7 @@ parameters:
   install-name:
     type: string
     description: The name to give the deployment.
-  chart-path:
-    type: string
-    default: helm/
-    description: Path to Helm chart.
+    default: $CIRCLE_PROJECT_REPONAME
   additional-values:
     type: string
     default: ''
@@ -35,31 +32,41 @@ parameters:
     type: enum
     enum: [small, medium, large, xlarge, 2xlarge]
     default: small
+  repo:
+    description: Nexus Helm repository URL.
+    type: string
+    default: $HELM_REPOSITORY_URL
+  repo-name:
+    type: string
+    default: premiscale
+    description: Repo alias (helm repo add <alias> <url>).
+  username:
+    description: Nexus Helm repository username.
+    type: string
+    default: $HELM_USERNAME
+  password:
+    description: Nexus Helm repository password.
+    type: string
+    default: $HELM_PASSWORD
+  version:
+    description: Version of the package to publish (helm package --version)
+    type: string
+    default: $CIRCLE_TAG
 resource_class: << parameters.resource-class >>
 executor: << parameters.executor >>
 steps:
   - checkout
+  - helm/install-helm-client
+  - helm-login:
+      repo: << parameters.repo >>
+      repo-name: << parameters.repo-name >>
+      username: << parameters.username >>
+      password: << parameters.password >>
   - loft-connect:
       cluster: << parameters.cluster >>
       loft-access-key: << parameters.loft-access-key >>
       loft-url: << parameters.loft-url >>
-  - helm/install-helm-client
   - run:
-      name:
+      name: Helm upgrade --install
       command: |+
-        if [ -z "<< parameters.additional-values >>" ]; then
-            (
-                cd << parameters.chart-path >> || exit 1 && \
-                helm dependency build && \
-                helm upgrade --install --namespace "<< parameters.namespace >>" --create-namespace "<< parameters.install-name >>" . \
-                  --values values.yaml \
-                  << parameters.additional-values >>
-            )
-        else
-            (
-                cd << parameters.chart-path >> || exit 1 && \
-                helm dependency build && \
-                helm upgrade --install --namespace "<< parameters.namespace >>" --create-namespace "<< parameters.install-name >>" . \
-                  --values values.yaml
-            )
-        fi
+        helm upgrade --install --namespace "<< parameters.namespace >>" --create-namespace "<< parameters.install-name >>" << parameters.repo-name >>/<< parameters.install-name >> --version << parameters.version >> << parameters.additional-values >>
