@@ -4,7 +4,7 @@ description: |
   Requires a context with Docker auth set.
 executor:
   name: machine
-  caching: true
+  caching: << parameters.docker-layer-caching >>
 resource_class: << parameters.resource-class >>
 parameters:
   resource-class:
@@ -26,6 +26,10 @@ parameters:
     type: string
   commit-tag:
     description: Whether or not to push an additional tag to the registry with the commit hash as the tag.
+    default: false
+    type: boolean
+  docker-layer-caching:
+    description: Enable DLC on the machine executor. Costs 200 credits / run, however.
     default: false
     type: boolean
   args:
