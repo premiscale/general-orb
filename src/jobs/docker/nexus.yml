@@ -1,7 +1,5 @@
 description: |
-  Build and push Docker containers to a Nexus Container Registry.
-
-  Requires a context with Docker auth set.
+  Build and push Docker containers to a Nexus Container Registry
 executor:
   name: machine
   caching: << parameters.docker-layer-caching >>
@@ -54,10 +52,10 @@ parameters:
     default: $DOCKER_DOMAIN
 steps:
   - checkout
-  - run:
-      name: Login to Nexus Docker registry.
-      command: |+
-        echo "<< parameters.password >>" | docker login << parameters.nexus-domain >> -u "<< parameters.username >>" --password-stdin
+  - docker-login:
+      username: << parameters.username >>
+      password: << parameters.password >>
+      domain: << parameters.nexus-domain >>
   - run:
       name: Build and push tag
       command: |+
