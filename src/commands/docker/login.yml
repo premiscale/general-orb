@@ -1,0 +1,20 @@
+description: |
+  Login to Docker registry
+parameters:
+  username:
+    description: Docker username.
+    type: string
+    default: $DOCKER_USERNAME
+  password:
+    description: Docker password.
+    type: string
+    default: $DOCKER_PASSWORD
+  domain:
+    description: Docker registry URL.
+    type: string
+    default: $DOCKER_DOMAIN
+steps:
+  - run:
+      name: Login to Nexus Docker registry.
+      command: |+
+        printf "<< parameters.password >>" | docker login << parameters.domain >> -u "<< parameters.username >>" --password-stdin

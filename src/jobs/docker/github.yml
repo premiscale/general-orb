@@ -46,10 +46,10 @@ parameters:
     default: $GITHUB_USERNAME
 steps:
   - checkout
-  - run:
-      name: Login to ghcr.io
-      command: |+
-        echo "<< parameters.token >>" | docker login ghcr.io -u "<< parameters.username >>" --password-stdin
+  - docker-login:
+      username: << parameters.username >>
+      password: << parameters.token >>
+      domain: ghcr.io
   - run:
       name: Build and push tag
       command: |+
