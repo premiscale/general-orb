@@ -1,6 +1,6 @@
 # `general` orb for CircleCI
 
-This orb is a collection of useful commands and jobs I like to reuse in many of my repositories to simplify their configs and reduce code duplication.
+This orb is a collection of useful commands and jobs we can reuse in many repositories to simplify configs and reduce code duplication.
 
 ## Development
 
