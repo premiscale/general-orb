@@ -33,7 +33,7 @@ workflows:
           requires:
             - general/orb-pack
           context:
-            - orb-publishing
+            - circleci
             - github
           filters:
             branches:
