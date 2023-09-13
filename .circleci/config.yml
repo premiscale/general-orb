@@ -68,6 +68,7 @@ workflows:
 
       - general/github-release:
           context: github
+          gh-version: 2.34.0
           filters:
             branches:
               ignore: /.*/
