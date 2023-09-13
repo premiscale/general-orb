@@ -14,7 +14,7 @@ workflows:
       # Development branches
 
       - dynamic/continue:
-          context: orb-publishing
+          context: circleci
 
       # On tag
 
