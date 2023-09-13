@@ -2,7 +2,7 @@
   "name": "general-orb",
   "private": true,
   "description": "A general CircleCI orb with helpful reusable jobs and commands",
-  "repository": "https://github.com/bjd2385/general-orb",
+  "repository": "https://github.com/premiscale/general-orb",
   "license": "GPL-3-Clause",
   "scripts": {
     "install:pre-commit-hooks": "pre-commit install --install-hooks --allow-missing-config -t pre-commit -t prepare-commit-msg",
