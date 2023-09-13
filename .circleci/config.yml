@@ -2,7 +2,7 @@ version: 2.1
 
 
 orbs:
-  general: bjd2385/general@0.7.5
+  general: bjd2385/general@0.7.8
   orb-tools: circleci/orb-tools@11.6.1
   shellcheck: circleci/shellcheck@3.1.2
 
