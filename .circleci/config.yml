@@ -14,7 +14,6 @@ workflows:
       # Development branches
 
       - dynamic/continue:
-          default-branch: master
           context: orb-publishing
 
       # On tag
