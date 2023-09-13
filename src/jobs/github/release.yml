@@ -24,6 +24,14 @@ parameters:
     description: GitHub token to use with the gh-client.
     type: string
     default: $GITHUB_TOKEN
+  github-organization:
+    description: GitHub organization / CircleCI namespace.
+    type: string
+    default: $CIRCLE_ORGANIZATION
+  github-project-name:
+    description: GitHub project name.
+    type: string
+    default: $CIRCLE_PROJECT_REPONAME
 steps:
   - checkout
   - run:
@@ -40,5 +48,5 @@ steps:
         echo "$LATEST_TAG"
         # Generate release from tag.
         echo "<< parameters.token >>" | gh auth login --with-token 2>/dev/null || true
-        gh repo set-default "${CIRCLE_ORGANIZATION}/${CIRCLE_PROJECT_REPONAME}"
+        gh repo set-default "<< parameters.github-organization >>/<< parameters.github-project-name >>"
         gh release create "$LATEST_TAG" --generate-notes
