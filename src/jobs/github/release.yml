@@ -40,4 +40,5 @@ steps:
         echo "$LATEST_TAG"
         # Generate release from tag.
         echo "<< parameters.token >>" | gh auth login --with-token 2>/dev/null || true
+        gh repo set-default
         gh release create "$LATEST_TAG" --generate-notes
