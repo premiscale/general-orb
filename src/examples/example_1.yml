@@ -1,0 +1,30 @@
+description: |+
+  The general orb contains a lot of helpful reusable jobs.
+usage:
+  version: 2.1
+
+
+  setup: true
+
+
+  orbs:
+    dynamic: bjd2385/dynamic-continuation@3.7.1
+    general: bjd2385/general@0.7.8
+
+
+  workflows:
+    general:
+      jobs:
+        # Development branches
+
+        - dynamic/continue:
+            context: circleci
+
+        # On tag
+
+        - general/orb-pack:
+            filters:
+              branches:
+                ignore: /.*/
+              tags:
+                only: /^v?[0-9]+\.[0-9]+\.[0-9]+$/

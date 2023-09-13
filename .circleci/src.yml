@@ -1,0 +1,40 @@
+version: 2.1
+
+
+orbs:
+  orb-tools: circleci/orb-tools@11.6.1
+  circleci-cli: circleci/circleci-cli@0.1.9
+  general: bjd2385/general@0.7.8
+
+
+workflows:
+  src:
+    jobs:
+      - orb-tools/lint:
+          resource_class: small
+
+      - orb-tools/review:
+          exclude: ''
+          max_command_length: 1024
+          resource_class: small
+
+      - general/orb-pack:
+          requires:
+            - orb-tools/lint
+            - orb-tools/review
+
+      - orb-tools/publish:
+          name: publish development orb
+          enable-pr-comment: true
+          vcs-type: << pipeline.project.type >>
+          orb-name: premiscale/general
+          pub-type: dev
+          resource_class: small
+          requires:
+            - general/orb-pack
+          context:
+            - circleci
+            - github
+          filters:
+            branches:
+              ignore: main

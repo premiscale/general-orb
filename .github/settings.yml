@@ -3,7 +3,7 @@ _extends: .github
 repository:
   name: general-orb
   description: An orb with many useful commands and jobs
-  homepage: https://github.com/bjd2385/general-orb
+  homepage: https://circleci.com/developer/orbs/orb/premiscale/general
 
   # A comma-separated list of topics to set on the repository
   topics: circleci, orb

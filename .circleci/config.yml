@@ -1,25 +1,65 @@
 version: 2.1
 
 
+setup: true
+
+
 orbs:
-  general: bjd2385/general@0.7.5
+  dynamic: bjd2385/dynamic-continuation@3.7.1
+  general: bjd2385/general@0.7.8
   orb-tools: circleci/orb-tools@11.6.1
-  shellcheck: circleci/shellcheck@3.1.2
-
-
-executors: {}
-
-
-commands: {}
-
-
-jobs: {}
+  slack: circleci/slack@4.12.5
 
 
 workflows:
-  on-tag:
+  general:
     jobs:
+      # Development branches
+
+      - dynamic/continue:
+          context: circleci
+
+      # On tag
+
       - general/orb-pack:
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v?[0-9]+\.[0-9]+\.[0-9]+$/
+
+      - slack/on-hold:
+          context: slack
+          requires:
+            - general/orb-pack
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v?[0-9]+\.[0-9]+\.[0-9]+$/
+
+      - request-approval:
+          requires:
+            - slack/on-hold
+          type: approval
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v?[0-9]+\.[0-9]+\.[0-9]+$/
+
+      - orb-tools/publish:
+          name: publish production orb
+          enable-pr-comment: false
+          vcs-type: << pipeline.project.type >>
+          orb-name: premiscale/general
+          pub-type: production
+          requires:
+            - request-approval
+          context:
+            - circleci
+          resource_class: small
+          tag-pattern: v?[0-9]+.[0-9]+.[0-9]+
           filters:
             branches:
               ignore: /.*/
@@ -33,52 +73,3 @@ workflows:
               ignore: /.*/
             tags:
               only: /^v?[0-9]+\.[0-9]+\.[0-9]+$/
-
-      - orb-tools/publish:
-          name: publish production orb
-          enable-pr-comment: false
-          vcs-type: << pipeline.project.type >>
-          orb-name: bjd2385/general
-          pub-type: production
-          requires:
-            - general/orb-pack
-          context:
-            - development
-            - orb-publishing
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /^v?[0-9]+\.[0-9]+\.[0-9]+$/
-
-  on-commit:
-    jobs:
-      # # Run a bunch of tests against this repo
-      # - orb-tools/lint
-
-      - general/orb-pack:
-          filters:
-            branches:
-              ignore: master
-
-      - shellcheck/check:
-          exclude: SC2148
-          filters:
-            branches:
-              ignore: master
-
-      - orb-tools/publish:
-          name: publish development orb
-          enable-pr-comment: true
-          vcs-type: << pipeline.project.type >>
-          orb-name: bjd2385/general
-          pub-type: dev
-          requires:
-            - general/orb-pack
-            - shellcheck/check
-          context:
-            - orb-publishing
-            - github
-          filters:
-            branches:
-              ignore: master
