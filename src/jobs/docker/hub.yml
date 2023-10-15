@@ -1,0 +1,84 @@
+description: |
+  Build an push a Docker image to DockerHub.
+executor:
+  name: machine
+  caching: << parameters.docker-layer-caching >>
+resource_class: << parameters.resource-class >>
+parameters:
+  resource-class:
+    type: enum
+    enum:
+      - medium
+      - large
+      - xlarge
+      - 2xlarge
+    default: medium
+    description: Resource class to run as.
+  image-name:
+    description: Name of the image.
+    default: ''
+    type: string
+  tag:
+    description: Name of the tag for the image.
+    default: latest
+    type: string
+  commit-tag:
+    description: Whether or not to push an additional tag to the registry with the commit hash as the tag.
+    default: false
+    type: boolean
+  docker-layer-caching:
+    description: Enable DLC on the machine executor. Costs 200 credits / run, however.
+    default: false
+    type: boolean
+  args:
+    description: Additional args string to add to the build command. (E.g., '--build-arg=HELLO=WORLD'.)
+    default: ''
+    type: string
+  path:
+    description: Path to a particular Dockerfile or containing directory with a Dockerfile present.
+    default: Dockerfile
+    type: string
+  username:
+    description: Docker username.
+    type: string
+    default: $DOCKER_USERNAME
+  password:
+    description: Docker Hub password.
+    type: string
+    default: $ACCESS_TOKEN
+  organization:
+    description: Docker Hub organization.
+    type: string
+    default: $ORGANIZATION_NAME
+steps:
+  - checkout
+  - docker-login:
+      username: << parameters.username >>
+      password: << parameters.password >>
+      domain: ''
+  - run:
+      name: Build and push tag
+      command: |+
+        if [[ "<< parameters.tag >>" =~ v[0-9]+.[0-9]+.[0-9]+ ]]; then
+            export _DOCKER_TAG="$(printf "<< parameters.tag >>" | grep -oP "(?<=v).*" | awk NF)"
+        else
+            export _DOCKER_TAG="<< parameters.tag >>"
+        fi
+
+        if [ "$(echo "<< parameters.path >>" | grep -oP "Dockerfile")" != "Dockerfile" ]; then
+            # Path does not contain the dockerfile, so we default to "Dockerfile".
+            docker build . -f ./<< parameters.path >>/Dockerfile -t << parameters.organization >>/<< parameters.image-name >>:"$_DOCKER_TAG" << parameters.args >>
+            docker push /<< parameters.image-name >>:"$_DOCKER_TAG"
+        else
+            # Path does specify the Dockerfile explictly, don't default to "Dockerfile". E.g., "docker/Dockerfile.develop".
+            docker build . -f ./<< parameters.path >> -t << parameters.organization >>/<< parameters.image-name >>:"$_DOCKER_TAG" << parameters.args >>
+            docker push << parameters.organization >>/<< parameters.image-name >>:"$_DOCKER_TAG"
+        fi
+  - when:
+      condition: << parameters.commit-tag >>
+      steps:
+        - run:
+            name: Push commit tag
+            command: |+
+              docker tag << parameters.organization >>/<< parameters.image-name >>:"$_DOCKER_TAG" << parameters.organization >>/<< parameters.image-name >>:$CIRCLE_SHA1
+              docker push << parameters.organization >>/<< parameters.image-name >>:$CIRCLE_SHA1
