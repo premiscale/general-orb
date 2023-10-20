@@ -1,0 +1,46 @@
+description: KubeConform validates CRDs
+executor: default
+resource_class: << parameters.resource-class >>
+parameters:
+  version:
+    description: Version of KubeConform to install.
+    type: string
+    default: 0.6.3
+  path:
+    description: Path to CRDs to validate.
+    type: string
+    default: crds/
+  output:
+    description: output format - json, junit, pretty, tap, text (default "text")
+    type: string
+    default: text
+  resource_class:
+    description: Resource class.
+    type: enum
+    enum:
+      - small
+      - medium
+      - large
+      - xlarge
+    default: small
+  executor:
+    type: executor
+    default: default
+  resource-class:
+    type: enum
+    enum: [small, medium, large, xlarge, 2xlarge]
+    default: small
+steps:
+  - checkout
+  - run:
+      name: Install KubeConform
+      command: |+
+        wget https://github.com/yannh/kubeconform/releases/download/v<< parameters.version >>/kubeconform-linux-amd64.tar.gz -O kubeconform-linux.tar.gz
+        mkdir kubeconform
+        tar -zxvf kubeconform-linux.tar.gz -C kubeconform
+        sudo install kubeconform/kubeconform /usr/bin/kubeconform
+        rm -rf kubeconform/
+  - run:
+      name: KubeConform CRDs
+      command: |+
+        kubeconform -exit-on-error -n 4 -output << parameters.output >> -strict -summary << parameters.path >>
