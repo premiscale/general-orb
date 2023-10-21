@@ -1,5 +1,7 @@
-description: |
+description: |+
   Build and push Docker containers to a Nexus Container Registry
+
+  Requires a context with $DOCKER_USERNAME, $DOCKER_PASSWORD, and $DOCKER_DOMAIN set.
 executor:
   name: machine
   caching: << parameters.docker-layer-caching >>
