@@ -17,4 +17,4 @@ steps:
   - run:
       name: Login to Nexus Docker registry.
       command: |+
-        printf "<< parameters.password >>" | docker login << parameters.domain >> -u "<< parameters.username >>" --password-stdin
+        printf "%s" "<< parameters.password >>" | docker login << parameters.domain >> -u "<< parameters.username >>" --password-stdin

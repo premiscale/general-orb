@@ -62,7 +62,7 @@ steps:
       name: Build and push tag
       command: |+
         if [[ "<< parameters.tag >>" =~ v[0-9]+.[0-9]+.[0-9]+ ]]; then
-            export _DOCKER_TAG="$(printf "<< parameters.tag >>" | grep -oP "(?<=v).*" | awk NF)"
+            export _DOCKER_TAG="$(printf "%s" "<< parameters.tag >>" | grep -oP "(?<=v).*" | awk NF)"
         else
             export _DOCKER_TAG="<< parameters.tag >>"
         fi

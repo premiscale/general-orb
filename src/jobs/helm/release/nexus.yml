@@ -56,7 +56,7 @@ steps:
             name: Update image tag
             command: |
               if [[ "<< parameters.image-tag >>" =~ v[0-9]+.[0-9]+.[0-9]+ ]]; then
-                  export _DOCKER_TAG="$(printf "<< parameters.image-tag >>" | grep -oP "(?<=v).*" | awk NF)"
+                  export _DOCKER_TAG="$(printf "%s" "<< parameters.image-tag >>" | grep -oP "(?<=v).*" | awk NF)"
               else
                   export _DOCKER_TAG="<< parameters.image-tag >>"
               fi
