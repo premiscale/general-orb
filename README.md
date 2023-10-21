@@ -19,7 +19,7 @@ yarn orb:validate
 When you're done with your testing, you may clean up the packed source with
 
 ```shell
-yarn orb:cleaup
+yarn orb:clean
 ```
 
 ### `pre-commit`

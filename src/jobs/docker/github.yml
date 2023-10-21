@@ -1,10 +1,10 @@
-description: |
+description: |+
   Build and push Docker containers to the GitHub Container Registry (ghcr.io).
 
   Requires a context with $GITHUB_TOKEN and $GITHUB_USER set to authenticate.
 executor:
   name: machine
-  caching: true
+  caching: << parameters.docker-layer-caching >>
 resource_class: << parameters.resource-class >>
 parameters:
   resource-class:
@@ -24,6 +24,10 @@ parameters:
     description: Name of the tag for the image.
     default: latest
     type: string
+  docker-layer-caching:
+    description: Enable DLC on the machine executor. Costs 200 credits / run, however.
+    default: false
+    type: boolean
   commit-tag:
     description: Whether or not to push an additional tag to the registry with the commit hash as the tag.
     default: false
@@ -54,7 +58,7 @@ steps:
       name: Build and push tag
       command: |+
         if [[ "<< parameters.tag >>" =~ v[0-9]+.[0-9]+.[0-9]+ ]]; then
-            export _DOCKER_TAG="$(printf "<< parameters.tag >>" | grep -oP "(?<=v).*" | awk NF)"
+            export _DOCKER_TAG="$(printf "%s" "<< parameters.tag >>" | grep -oP "(?<=v).*" | awk NF)"
         else
             export _DOCKER_TAG="<< parameters.tag >>"
         fi
@@ -67,5 +71,5 @@ steps:
         - run:
             name: Push commit tag
             command: |+
-              docker tag ghcr.io/<< parameters.username >>/<< parameters.image-name >>:"$_DOCKER_TAG" ghcr.io/<< parameters.username >>/<< parameters.image-name >>:$CIRCLE_SHA1
-              docker push ghcr.io/<< parameters.username >>/<< parameters.image-name >>:$CIRCLE_SHA1
+              docker tag ghcr.io/<< parameters.username >>/<< parameters.image-name >>:"$_DOCKER_TAG" ghcr.io/<< parameters.username >>/<< parameters.image-name >>:"$CIRCLE_SHA1"
+              docker push ghcr.io/<< parameters.username >>/<< parameters.image-name >>:"$CIRCLE_SHA1"

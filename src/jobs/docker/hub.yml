@@ -1,7 +1,7 @@
 description: |+
-  Build and push Docker containers to a Nexus Container Registry
+  Build an push a Docker image to DockerHub.
 
-  Requires a context with $DOCKER_USERNAME, $DOCKER_PASSWORD, and $DOCKER_DOMAIN set.
+  Requires a context with $DOCKER_USERNAME, $ACCESS_TOKEN, set.
 executor:
   name: machine
   caching: << parameters.docker-layer-caching >>
@@ -45,19 +45,19 @@ parameters:
     type: string
     default: $DOCKER_USERNAME
   password:
-    description: Docker password.
+    description: Docker Hub password.
     type: string
-    default: $DOCKER_PASSWORD
-  nexus-domain:
-    description: Nexus URL.
+    default: $ACCESS_TOKEN
+  organization:
+    description: Organization name on Docker Hub.
     type: string
-    default: $DOCKER_DOMAIN
+    default: $ORGANIZATION_NAME
 steps:
   - checkout
   - docker-login:
       username: << parameters.username >>
       password: << parameters.password >>
-      domain: << parameters.nexus-domain >>
+      domain: docker.io
   - run:
       name: Build and push tag
       command: |+
@@ -69,12 +69,12 @@ steps:
 
         if [ "$(echo "<< parameters.path >>" | grep -oP "Dockerfile")" != "Dockerfile" ]; then
             # Path does not contain the dockerfile, so we default to "Dockerfile".
-            docker build . -f ./<< parameters.path >>/Dockerfile -t << parameters.nexus-domain >>/<< parameters.image-name >>:"$_DOCKER_TAG" << parameters.args >>
-            docker push << parameters.nexus-domain >>/<< parameters.image-name >>:"$_DOCKER_TAG"
+            docker build . -f ./<< parameters.path >>/Dockerfile -t << parameters.organization >>/<< parameters.image-name >>:"$_DOCKER_TAG" << parameters.args >>
+            docker push << parameters.organization >>/<< parameters.image-name >>:"$_DOCKER_TAG"
         else
             # Path does specify the Dockerfile explictly, don't default to "Dockerfile". E.g., "docker/Dockerfile.develop".
-            docker build . -f ./<< parameters.path >> -t << parameters.nexus-domain >>/<< parameters.image-name >>:"$_DOCKER_TAG" << parameters.args >>
-            docker push << parameters.nexus-domain >>/<< parameters.image-name >>:"$_DOCKER_TAG"
+            docker build . -f ./<< parameters.path >> -t << parameters.organization >>/<< parameters.image-name >>:"$_DOCKER_TAG" << parameters.args >>
+            docker push << parameters.organization >>/<< parameters.image-name >>:"$_DOCKER_TAG"
         fi
   - when:
       condition: << parameters.commit-tag >>
@@ -82,5 +82,5 @@ steps:
         - run:
             name: Push commit tag
             command: |+
-              docker tag << parameters.nexus-domain >>/<< parameters.image-name >>:"$_DOCKER_TAG" << parameters.nexus-domain >>/<< parameters.image-name >>:$CIRCLE_SHA1
-              docker push << parameters.nexus-domain >>/<< parameters.image-name >>:$CIRCLE_SHA1
+              docker tag << parameters.image-name >>:"$_DOCKER_TAG" << parameters.organization >>/<< parameters.image-name >>:$CIRCLE_SHA1
+              docker push << parameters.organization >>/<< parameters.image-name >>:$CIRCLE_SHA1
