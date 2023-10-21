@@ -48,6 +48,10 @@ parameters:
     description: Docker Hub password.
     type: string
     default: $ACCESS_TOKEN
+  organization:
+    description: Organization name on Docker Hub.
+    type: string
+    default: $ORGANIZATION_NAME
 steps:
   - checkout
   - docker-login:
@@ -65,12 +69,12 @@ steps:
 
         if [ "$(echo "<< parameters.path >>" | grep -oP "Dockerfile")" != "Dockerfile" ]; then
             # Path does not contain the dockerfile, so we default to "Dockerfile".
-            docker build . -f ./<< parameters.path >>/Dockerfile -t << parameters.image-name >>:"$_DOCKER_TAG" << parameters.args >>
+            docker build . -f ./<< parameters.path >>/Dockerfile -t << parameters.organization >>/<< parameters.image-name >>:"$_DOCKER_TAG" << parameters.args >>
             docker push << parameters.image-name >>:"$_DOCKER_TAG"
         else
             # Path does specify the Dockerfile explictly, don't default to "Dockerfile". E.g., "docker/Dockerfile.develop".
-            docker build . -f ./<< parameters.path >> -t << parameters.image-name >>:"$_DOCKER_TAG" << parameters.args >>
-            docker push << parameters.image-name >>:"$_DOCKER_TAG"
+            docker build . -f ./<< parameters.path >> -t << parameters.organization >>/<< parameters.image-name >>:"$_DOCKER_TAG" << parameters.args >>
+            docker push << parameters.organization >>/<< parameters.image-name >>:"$_DOCKER_TAG"
         fi
   - when:
       condition: << parameters.commit-tag >>
@@ -78,5 +82,5 @@ steps:
         - run:
             name: Push commit tag
             command: |+
-              docker tag << parameters.image-name >>:"$_DOCKER_TAG" << parameters.image-name >>:$CIRCLE_SHA1
-              docker push << parameters.image-name >>:$CIRCLE_SHA1
+              docker tag << parameters.image-name >>:"$_DOCKER_TAG" << parameters.organization >>/<< parameters.image-name >>:$CIRCLE_SHA1
+              docker push << parameters.organization >>/<< parameters.image-name >>:$CIRCLE_SHA1
