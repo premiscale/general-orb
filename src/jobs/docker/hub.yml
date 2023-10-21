@@ -1,7 +1,7 @@
 description: |+
   Build an push a Docker image to DockerHub.
 
-  Requires a context with $DOCKER_USERNAME, $ACCESS_TOKEN, and $ORGANIZATION_NAME
+  Requires a context with $DOCKER_USERNAME, $ACCESS_TOKEN, set.
 executor:
   name: machine
   caching: << parameters.docker-layer-caching >>
