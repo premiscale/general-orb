@@ -53,7 +53,7 @@ steps:
   - docker-login:
       username: << parameters.username >>
       password: << parameters.password >>
-      domain: ''
+      domain: docker.io
   - run:
       name: Build and push tag
       command: |+
