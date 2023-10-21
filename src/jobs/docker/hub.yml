@@ -74,7 +74,7 @@ steps:
         else
             # Path does specify the Dockerfile explictly, don't default to "Dockerfile". E.g., "docker/Dockerfile.develop".
             docker build . -f ./<< parameters.path >> -t << parameters.organization >>/<< parameters.image-name >>:"$_DOCKER_TAG" << parameters.args >>
-            docker push << parameters.organization >>/<< parameters.image-name >>:"$_DOCKER_TAG"
+            docker push << parameters.organization >>/<< parameters.organization >>/<< parameters.image-name >>:"$_DOCKER_TAG"
         fi
   - when:
       condition: << parameters.commit-tag >>
