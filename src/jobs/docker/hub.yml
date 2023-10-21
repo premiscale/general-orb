@@ -66,7 +66,7 @@ steps:
         if [ "$(echo "<< parameters.path >>" | grep -oP "Dockerfile")" != "Dockerfile" ]; then
             # Path does not contain the dockerfile, so we default to "Dockerfile".
             docker build . -f ./<< parameters.path >>/Dockerfile -t << parameters.image-name >>:"$_DOCKER_TAG" << parameters.args >>
-            docker push /<< parameters.image-name >>:"$_DOCKER_TAG"
+            docker push << parameters.image-name >>:"$_DOCKER_TAG"
         else
             # Path does specify the Dockerfile explictly, don't default to "Dockerfile". E.g., "docker/Dockerfile.develop".
             docker build . -f ./<< parameters.path >> -t << parameters.image-name >>:"$_DOCKER_TAG" << parameters.args >>
