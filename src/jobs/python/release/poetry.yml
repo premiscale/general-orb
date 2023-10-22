@@ -33,7 +33,7 @@ parameters:
   pypirc-config:
     description: Location of the .pypirc-file to use.
     type: string
-    default: ''
+    default: .pypirc
   version:
     description: Override the version of the uploaded artifact in pyproject.toml.
     type: string
