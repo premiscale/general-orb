@@ -34,4 +34,5 @@ steps:
       name: MyPy
       command: |
         pip install mypy
+        yes | mypy --install-types
         mypy --config-file << parameters.configuration_file >> << parameters.modules_path >> --python-version "$(python --version | grep -oP "[0-9].[0-9]+")"
