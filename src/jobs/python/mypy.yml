@@ -37,6 +37,6 @@ steps:
   - run:
       name: MyPy
       command: |
-        pip install --no-python-version-warning --disable-pip-version-check mypy
+        pip install --no-python-version-warning --disable-pip-version-check --upgrade mypy
         mypy --install-types --non-interactive || true
         mypy --config-file << parameters.configuration_file >> << parameters.mypy-args >> << parameters.modules_path >> --python-version "$(python --version | grep -oP "[0-9].[0-9]+")"
