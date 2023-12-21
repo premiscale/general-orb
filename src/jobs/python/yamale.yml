@@ -13,6 +13,7 @@ parameters:
       - large
       - xlarge
       - 2xlarge
+      - premiscale/on-premise
     default: small
     description: Resource class to run as.
   schema-path:
@@ -23,6 +24,10 @@ parameters:
     type: string
     default: .
     description: Path containing YAML files to validate.
+  executor:
+    description: Executor image to run as.
+    default: python-3-10
+    type: executor
 steps:
   - run:
       name: Install yamale

@@ -2,7 +2,7 @@ description: |
   Pre-pack orbs, as I've described in
 
   https://github.com/CircleCI-Public/orb-tools-orb/pull/149
-executor: default
+executor: << parameters.executor >>
 resource_class: << parameters.resource-class >>
 parameters:
   resource-class:
@@ -13,8 +13,13 @@ parameters:
       - large
       - xlarge
       - 2xlarge
+      - premiscale/on-premise
     default: small
     description: Resource class to run as.
+  executor:
+    description: Executor image to run as.
+    default: default
+    type: executor
 steps:
   - checkout
   - circleci-cli/install

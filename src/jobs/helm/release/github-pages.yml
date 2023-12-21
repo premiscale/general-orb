@@ -1,6 +1,6 @@
 description: |
   Package and upload a Helm chart to a GitHub repository's pages branch.
-executor: default
+executor: << parameters.executor >>
 resource_class: << parameters.resource-class >>
 parameters:
   resource-class:
@@ -11,8 +11,13 @@ parameters:
       - large
       - xlarge
       - 2xlarge
+      - premiscale/on-premise
     default: small
     description: Resource class to run as.
+  executor:
+    description: Executor image to run as.
+    default: default
+    type: executor
   chart-path:
     description: Path to Helm chart we wish to package.
     type: string
