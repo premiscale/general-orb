@@ -37,6 +37,10 @@ parameters:
     description: Nexus Helm repository password.
     type: string
     default: $HELM_PASSWORD
+  pre-command:
+    description: Run a command prior to packaging.
+    type: string
+    default: ''
 executor: default
 resource_class: small
 steps:
@@ -61,6 +65,13 @@ steps:
                   export _DOCKER_TAG="<< parameters.image-tag >>"
               fi
               yq -i "<< parameters.image-tag-path >> = \"$_DOCKER_TAG\"" << parameters.path >>/values.yaml
+  - unless:
+      condition:
+        equal: [<< parameters.pre-command >>, '']
+      steps:
+        - run:
+            name: Pre-command
+            command: << parameters.pre-command >>
   - run:
       name: 'nexus-helm: package'
       command: |+
