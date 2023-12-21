@@ -10,6 +10,7 @@ parameters:
       - large
       - xlarge
       - 2xlarge
+      - premiscale/on-premise
     default: small
     description: Resource class to run as.
   modules_path:

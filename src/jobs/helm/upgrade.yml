@@ -26,11 +26,18 @@ parameters:
     type: string
     description: Loft.sh deployment's domain.
   executor:
-    type: executor
+    description: Executor image to run as.
     default: default
+    type: executor
   resource-class:
     type: enum
-    enum: [small, medium, large, xlarge, 2xlarge]
+    enum:
+      - small
+      - medium
+      - large
+      - xlarge
+      - 2xlarge
+      - premiscale/on-premise
     default: small
   repo:
     description: Nexus Helm repository URL.
