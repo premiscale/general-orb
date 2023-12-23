@@ -1,5 +1,5 @@
 description: Run pylint
-executor: python-3-10
+executor: << parameters.executor >>
 resource_class: << parameters.resource-class >>
 parameters:
   resource-class:
