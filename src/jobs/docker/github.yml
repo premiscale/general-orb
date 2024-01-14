@@ -48,6 +48,10 @@ parameters:
     description: GitHub user to authenticate with ghcr.io.
     type: string
     default: $GITHUB_USERNAME
+  buildkit:
+    description: Enable buildkit (https://docs.docker.com/build/buildkit/#getting-started).
+    type: boolean
+    default: true
 steps:
   - checkout
   - docker-login:
@@ -61,6 +65,10 @@ steps:
             export _DOCKER_TAG="$(printf "%s" "<< parameters.tag >>" | grep -oP "(?<=v).*" | awk NF)"
         else
             export _DOCKER_TAG="<< parameters.tag >>"
+        fi
+
+        if [ "<< parameters.buildkit >>" = "true" ]; then
+            export DOCKER_BUILDKIT=1
         fi
 
         docker build -f << parameters.path >> -t ghcr.io/<< parameters.username >>/<< parameters.image-name >>:"$_DOCKER_TAG" << parameters.args >>

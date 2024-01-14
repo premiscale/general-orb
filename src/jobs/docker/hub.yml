@@ -52,6 +52,10 @@ parameters:
     description: Organization name on Docker Hub.
     type: string
     default: $ORGANIZATION_NAME
+  buildkit:
+    description: Enable buildkit (https://docs.docker.com/build/buildkit/#getting-started).
+    type: boolean
+    default: true
 steps:
   - checkout
   - docker-login:
@@ -65,6 +69,10 @@ steps:
             export _DOCKER_TAG="$(printf "%s" "<< parameters.tag >>" | grep -oP "(?<=v).*" | awk NF)"
         else
             export _DOCKER_TAG="<< parameters.tag >>"
+        fi
+
+        if [ "<< parameters.buildkit >>" = "true" ]; then
+            export DOCKER_BUILDKIT=1
         fi
 
         if [ "$(echo "<< parameters.path >>" | grep -oP "Dockerfile")" != "Dockerfile" ]; then
