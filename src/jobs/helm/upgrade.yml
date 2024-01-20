@@ -9,6 +9,23 @@ parameters:
     type: string
     description: The name to give the deployment.
     default: $CIRCLE_PROJECT_REPONAME
+  uninstall-prev-name:
+    type: string
+    description: |+
+      Name of another Helm installation managed for a different branch.
+
+      This parameter is intended to be used with cross-namespace deployments with a gitflow like
+
+          development branch -> master -> tags
+
+      with 3 separate test namespaces for each.
+    default: ''
+  uninstall-prev-namespace:
+    type: string
+    description: |+
+      Intended to be used in tandem with the 'uninstall-prev-name'-parameter. Specify a namespace, if different
+      than the deployment, to perform the uninstall within.
+    default: default
   additional-values:
     type: string
     default: ''
@@ -64,6 +81,13 @@ executor: << parameters.executor >>
 steps:
   - checkout
   - helm/install-helm-client
+  - when:
+      condition: << parameter.uninstall-prev-name >>
+      steps:
+        - run:
+            name: Uninstall previous managed installation
+            command: |+
+              helm uninstall << parameters.uninstall-prev-name >> -n << parameters.uninstall-prev-namespace >>
   - helm-login:
       repo: << parameters.repo >>
       repo-name: << parameters.repo-name >>
