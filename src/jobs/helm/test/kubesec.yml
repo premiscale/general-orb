@@ -51,9 +51,8 @@ steps:
         rm -rf kubesec/
   - run:
       name: 'Pre: define test function'
+      description: Test that the manifests are both valid and meet our minimum scoring requirement across supported Kubernetes versions.
       command: |+
-        ##
-        # Test that the manifests are both valid and meet our minimum scoring requirement across supported Kubernetes versions.
         test()
         {
             if [ $# -ne 2 ]; then
@@ -90,6 +89,7 @@ steps:
         }
   - run:
       name: kubesec
+      description: Run tests against a variety of Kubernetes versions and charts.
       command: |+
         mapfile -t -d " " _TARGET_KUBERNETES_VERSIONS < <(printf "%s" "<< parameters.kubernetes-versions >>")
         mapfile -t _HELM_CHART_DIRECTORIES < <(find -type f -name "Chart.yaml" -exec dirname {} \;)
