@@ -65,11 +65,7 @@ steps:
       condition:
         equal: [<< parameters.image-tag >>, '']
       steps:
-        - run:
-            name: Install yq
-            command: |
-              curl -sL https://github.com/mikefarah/yq/releases/download/v4.30.6/yq_linux_amd64 --out yq
-              sudo install --compare yq /usr/local/bin/yq || true
+        - utils/install-yq
         - run:
             name: Update image tag
             command: |

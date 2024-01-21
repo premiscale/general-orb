@@ -1,0 +1,101 @@
+description: |+
+  Run kubesec against all Helm charts in a project.
+executor: << parameters.executor >>
+resource_class: << parameters.resource-class >>
+parameters:
+  minimum-score:
+    description: Minimum kubesec score for every chart to pass the job.
+    type: integer
+    default: 0
+  resource-class:
+    type: enum
+    enum:
+      - small
+      - medium
+      - large
+      - xlarge
+      - 2xlarge
+      - premiscale/on-premise
+    default: small
+    description: Resource class to run as.
+  kubeconform-schema:
+    description: |+
+      Add additional schema, such as Bitnami CRDs for SealedSecrets:
+
+        '--schema-location https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/bitnami.com/sealedsecret_v1alpha1.json'
+    type: string
+    default: ''
+  kubesec-version:
+    description: Version of kubesec to install.
+    default: 2.14.0
+    type: string
+  kubernetes-versions:
+    description: A space-delimited set of Kubernetes versions to check schema (kubeconform) against.
+    type: string
+    default: '1.24.17 1.25.16 1.26.11 1.27.8 1.28.4'
+  executor:
+    description: Executor image to run as.
+    default: default
+    type: executor
+steps:
+  - checkout
+  - helm/install-helm-client
+  - utils/install-jq
+  - run:
+      name: Install kubesec
+      command: |+
+        curl -sL https://github.com/controlplaneio/kubesec/releases/download/v<< parameters.kubesec-version >>/kubesec_linux_amd64.tar.gz -o kubesec.tar.gz
+        mkdir kubesec/
+        tar -zxvf kubesec.tar.gz -C kubesec/
+        sudo install kubesec/kubesec /usr/bin/kubesec
+        rm -rf kubesec/
+  - run:
+      name: 'Pre: define test function'
+      command: |+
+        ##
+        # Test that the manifests are both valid and meet our minimum scoring requirement across supported Kubernetes versions.
+        test()
+        {
+            if [ $# -ne 2 ]; then
+                printf "Function \"test\" expected 2 arguments: Helm chart path, Kubernetes version.\\n" >&2
+                exit 1
+            fi
+
+            printf "INFO: running kubesec against chart located at \"%s\" K8s v%s\\n" "$chart_path" "$kubernetes_version"
+
+            local chart_path kubernetes_version report results results_length i score
+
+            chart_path="$1"
+            kubernetes_version="$2"
+            report="$(helm template "$chart_path" | kubesec scan - --kubernetes-version "$kubernetes_version" --schema-location default << parameters.add-schema >> || true)"
+            results="$(printf "%s" "$report" | jq -r '{ "results": [ .[] | { "type": .object, "valid": .valid, "score": .score } ] }')"
+            results_length="$(printf "%s" "$results" | jq -r '.results | length')"
+
+            for (( i=0; i<results_length; i++ )); do
+                # kubeconform: test that the manifest is actually a valid kubernetes manifest for this version of K8s.
+                if [ "$(printf "%s" "$results" | jq -r ".results[$i].valid")" != "true" ]; then
+                    printf "ERROR: manifest \"%s\" on chart \"%s\" is not valid on Kubernetes version \"%s\".\\n" "$(printf "%s" "$results" | jq -r ".results[$i].type")" "$chart_path" "$kubernetes_version" >&2
+                    printf "%s\\n" "$report"
+                    exit 1
+                fi
+
+                # Test that the kubesec score meets our minimum requirement.
+                score="$(printf "%s" "$results" | jq -r ".results[$i].score")"
+                if [ "$score" -lt "<< parameters.minimum-score >>" ]; then
+                    printf "ERROR: manifest \"%s\" on chart \"%s\" does not meet minimum score \"%i\" on Kubernetes version \"%s\".\\n" "$(printf "%s" "$results" | jq -r ".results[$i].type")" "$chart_path" "<< parameters.minimum-score >>" "$kubernetes_version" >&2
+                    printf "%s\\n" "$report"
+                    exit 1
+                fi
+            done
+        }
+  - run:
+      name: kubesec
+      command: |+
+        mapfile -t -d " " _TARGET_KUBERNETES_VERSIONS < <(printf "%s" "<< parameters.kubernetes-versions >>")
+        mapfile -t _HELM_CHART_DIRECTORIES < <(find -type f -name "Chart.yaml" -exec dirname {} \;)
+
+        for chart_path in "${_HELM_CHART_DIRECTORIES[@]}"; do
+            for version in "${_TARGET_KUBERNETES_VERSIONS[@]}"; do
+                test "$chart_path" "$kubernetes_version"
+            done
+        done

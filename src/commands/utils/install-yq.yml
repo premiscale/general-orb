@@ -1,0 +1,14 @@
+description: Install yq
+parameters:
+  yq-version:
+    type: string
+    description: yq version to install.
+    default: 4.40.5
+steps:
+  - run:
+      name: Install yq
+      command: |+
+        curl -sL https://github.com/mikefarah/yq/releases/download/v<< parameters.yq-version >>/yq_linux_amd64 -o yq
+        sudo install yq /usr/bin/yq
+        rm yq
+        yq --version
