@@ -81,8 +81,8 @@ executor: << parameters.executor >>
 steps:
   - checkout
   - helm/install-helm-client
-  - when:
-      condition: << parameter.uninstall-prev-name >>
+  - unless:
+      condition: << parameters.uninstall-prev-name >>
       steps:
         - run:
             name: Uninstall previous managed installation

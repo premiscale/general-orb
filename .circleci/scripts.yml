@@ -2,11 +2,12 @@ version: 2.1
 
 
 orbs:
-  shellcheck: circleci/shellcheck@3.1.2
+  shellcheck: circleci/shellcheck@3.2.0
 
 
 workflows:
   scripts:
     jobs:
       - shellcheck/check:
+          # This needs to stay on this project; src/scripts/ contains scripts that do not need a shebang.
           exclude: SC2148

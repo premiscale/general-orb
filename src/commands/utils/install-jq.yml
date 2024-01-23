@@ -1,0 +1,14 @@
+description: Install jq
+parameters:
+  jq-version:
+    type: string
+    description: jq version to install.
+    default: 1.7.1
+steps:
+  - run:
+      name: Install jq
+      command: |+
+        curl -sL https://github.com/jqlang/jq/releases/download/jq-<< parameters.jq-version >>/jq-linux-amd64 -o jq
+        sudo install jq /usr/bin/jq
+        rm jq
+        jq --version
