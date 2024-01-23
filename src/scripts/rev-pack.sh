@@ -1,7 +1,7 @@
 # Reverse operation of pre-pack.sh. If files exist with a prefix that matches a directory name, they'll be moved under
 # that directory, and the prefix removed.
 
-# shellcheck disable=SC2216
+# shellcheck disable=SC2216,SC2148
 
 # Force deletion of files even if checksums (i.e. their contents) don't match.
 FORCE="${1:-false}"

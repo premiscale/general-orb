@@ -1,6 +1,8 @@
 # Reduce nested commands and jobs to files under src/commands or src/jobs so they can be packed by 'circleci orb pack src/'.
 # Allows you to group collections of commands under directories.
 
+# shellcheck disable=SC2216,SC2148
+
 pre-pack()
 {
     local current_directory="$1"

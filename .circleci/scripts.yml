@@ -8,4 +8,6 @@ orbs:
 workflows:
   scripts:
     jobs:
-      - shellcheck/check
+      - shellcheck/check:
+          # This needs to stay on this project; src/scripts/ contains scripts that do not need a shebang.
+          exclude: SC2148
