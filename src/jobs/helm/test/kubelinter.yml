@@ -36,6 +36,6 @@ steps:
         rm -rf kubelinter
   - run:
       name: kubelinter
-      description: Run tests against a variety of Kubernetes versions and charts.
+      description: Run kubelinter against all charts in a repository.
       command: |+
         kubelinter . --exclude << parameters.exclude >>

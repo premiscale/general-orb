@@ -89,7 +89,7 @@ steps:
         }
   - run:
       name: kubesec
-      description: Run tests against a variety of Kubernetes versions and charts.
+      description: Run kubesec against a variety of Kubernetes versions and charts.
       command: |+
         mapfile -t -d " " _TARGET_KUBERNETES_VERSIONS < <(printf "%s" "<< parameters.kubernetes-versions >>")
         mapfile -t _HELM_CHART_DIRECTORIES < <(find -type f -name "Chart.yaml" -exec dirname {} \;)
