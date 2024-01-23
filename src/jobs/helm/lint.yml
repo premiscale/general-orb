@@ -21,10 +21,27 @@ parameters:
   chart-path:
     description: Path to Helm chart we wish to lint.
     type: string
-    default: helm/
+    default: ''
 steps:
   - checkout
   - helm/install-helm-client
-  - run:
-      name: Helm lint
-      command: helm lint << parameters.chart-path >>
+  # When there's a chart path specified.
+  - when:
+      condition: << parameters.chart-path >>
+      steps:
+        - run:
+            name: Helm lint
+            command: |+
+              helm lint << parameters.chart-path >>
+  #
+  - unless:
+      condition: << parameters.chart-path >>
+      steps:
+        - run:
+            name: Helm lint
+            command: |+
+              mapfile -t _HELM_CHART_DIRECTORIES < <(find -type f -name "Chart.yaml" -exec dirname {} \;)
+
+              for chart_path in "${_HELM_CHART_DIRECTORIES[@]}"; do
+                  helm lint "$chart_path"
+              done
