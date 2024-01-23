@@ -23,6 +23,8 @@ parameters:
       Add additional schema, such as Bitnami CRDs for SealedSecrets:
 
         '--schema-location https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/bitnami.com/sealedsecret_v1alpha1.json'
+
+      Note: the schema MUST be in JSON format, otherwise kubesec will just ignore it.
     type: string
     default: ''
   kubesec-version:
