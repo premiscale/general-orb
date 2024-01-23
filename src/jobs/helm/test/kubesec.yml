@@ -97,6 +97,7 @@ steps:
 
         for chart_path in "${_HELM_CHART_DIRECTORIES[@]}"; do
             for kubernetes_version in "${_TARGET_KUBERNETES_VERSIONS[@]}"; do
+                printf "kubesec: testing \"%s\" on k8s version \"%s\"" "$chart_path" "$kubernetes_version"
                 test "$chart_path" "$kubernetes_version"
             done
         done
