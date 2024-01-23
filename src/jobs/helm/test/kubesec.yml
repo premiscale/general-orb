@@ -40,7 +40,7 @@ parameters:
 steps:
   - checkout
   - helm/install-helm-client
-  - utils/install-jq
+  - utils-install-jq
   - run:
       name: Install kubesec
       command: |+
@@ -64,7 +64,7 @@ steps:
 
             chart_path="$1"
             kubernetes_version="$2"
-            report="$(helm template "$chart_path" | kubesec scan - --kubernetes-version "$kubernetes_version" --schema-location default << parameters.add-schema >> || true)"
+            report="$(helm template "$chart_path" | kubesec scan - --kubernetes-version "$kubernetes_version" --schema-location default << parameters.kubeconform-schema >> || true)"
             results="$(printf "%s" "$report" | jq -r '{ "results": [ .[] | { "type": .object, "valid": .valid, "score": .score } ] }')"
             results_length="$(printf "%s" "$results" | jq -r '.results | length')"
 

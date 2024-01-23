@@ -65,7 +65,7 @@ steps:
       condition:
         equal: [<< parameters.image-tag >>, '']
       steps:
-        - utils/install-yq
+        - utils-install-yq
         - run:
             name: Update image tag
             command: |

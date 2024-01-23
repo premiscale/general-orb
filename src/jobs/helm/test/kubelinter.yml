@@ -18,7 +18,7 @@ parameters:
     description: Version of kubelinter to install.
     default: 0.6.5
     type: string
-  excludes:
+  exclude:
     description: Exclude is a list of check names to exclude.
     default: ''
     type: string
