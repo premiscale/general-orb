@@ -1,6 +1,6 @@
 # `general` orb for CircleCI
 
-This orb is a collection of useful commands and jobs we can reuse in many repositories to simplify configs and reduce code duplication.
+This orb is a collection of useful commands and jobs we can reuse in many repositories to simplify configs and reduce code duplication in [dynamically-continued](https://github.com/emmeowzing/dynamic-continuation-orb) pipelines.
 
 ## Development
 
