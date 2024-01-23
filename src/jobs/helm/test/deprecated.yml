@@ -28,6 +28,7 @@ parameters:
     type: executor
 steps:
   - checkout
+  - helm/install-helm-client
   - run:
       name: Install pluto
       command: |+

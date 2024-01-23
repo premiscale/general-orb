@@ -64,6 +64,7 @@ steps:
 
             chart_path="$1"
             kubernetes_version="$2"
+
             report="$(helm template "$chart_path" | kubesec scan - --kubernetes-version "$kubernetes_version" --schema-location default << parameters.kubeconform-schema >> || true)"
             results="$(printf "%s" "$report" | jq -r '{ "results": [ .[] | { "type": .object, "valid": .valid, "score": .score } ] }')"
             results_length="$(printf "%s" "$results" | jq -r '.results | length')"
@@ -95,7 +96,7 @@ steps:
         mapfile -t _HELM_CHART_DIRECTORIES < <(find -type f -name "Chart.yaml" -exec dirname {} \;)
 
         for chart_path in "${_HELM_CHART_DIRECTORIES[@]}"; do
-            for version in "${_TARGET_KUBERNETES_VERSIONS[@]}"; do
+            for kubernetes_version in "${_TARGET_KUBERNETES_VERSIONS[@]}"; do
                 test "$chart_path" "$kubernetes_version"
             done
         done

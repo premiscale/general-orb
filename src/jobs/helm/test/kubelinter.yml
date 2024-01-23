@@ -34,8 +34,19 @@ steps:
         curl -sL https://github.com/stackrox/kube-linter/releases/download/v<< parameters.kubelinter-version >>/kube-linter-linux -o kubelinter
         sudo install kubelinter /usr/bin/kubelinter
         rm -rf kubelinter
-  - run:
-      name: kubelinter
-      description: Run kubelinter against all charts in a repository.
-      command: |+
-        kubelinter . --exclude << parameters.exclude >>
+  - when:
+      condition: << parameters.exclude >>
+      steps:
+        - run:
+            name: kubelinter
+            description: Run kubelinter against all charts in a repository.
+            command: |+
+              kubelinter lint . --exclude << parameters.exclude >>
+  - unless:
+      condition: << parameters.exclude >>
+      steps:
+        - run:
+            name: kubelinter
+            description: Run kubelinter against all charts in a repository.
+            command: |+
+              kubelinter lint .
