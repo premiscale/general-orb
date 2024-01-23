@@ -60,8 +60,6 @@ steps:
                 exit 1
             fi
 
-            printf "INFO: running kubesec against chart located at \"%s\" K8s v%s\\n" "$chart_path" "$kubernetes_version"
-
             local chart_path kubernetes_version report results results_length i score
 
             chart_path="$1"
@@ -69,6 +67,8 @@ steps:
             report="$(helm template "$chart_path" | kubesec scan - --kubernetes-version "$kubernetes_version" --schema-location default << parameters.add-schema >> || true)"
             results="$(printf "%s" "$report" | jq -r '{ "results": [ .[] | { "type": .object, "valid": .valid, "score": .score } ] }')"
             results_length="$(printf "%s" "$results" | jq -r '.results | length')"
+
+            printf "INFO: running kubesec against chart located at \"%s\" K8s v%s\\n" "$chart_path" "$kubernetes_version"
 
             for (( i=0; i<results_length; i++ )); do
                 # kubeconform: test that the manifest is actually a valid kubernetes manifest for this version of K8s.
