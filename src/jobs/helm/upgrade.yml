@@ -81,7 +81,7 @@ executor: << parameters.executor >>
 steps:
   - checkout
   - helm/install-helm-client
-  - unless:
+  - when:
       condition: << parameters.uninstall-prev-name >>
       steps:
         - run:
