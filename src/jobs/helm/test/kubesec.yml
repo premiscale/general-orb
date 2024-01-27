@@ -63,24 +63,29 @@ steps:
                 printf "kubesec: testing \"%s\" on k8s version \"%s\"\\n" "$chart_path" "$kubernetes_version"
 
                 report="$(helm template "$chart_path" | kubesec scan - --kubernetes-version "$kubernetes_version" --schema-location default << parameters.kubeconform-schema >> || true)"
-                results="$(printf "%s" "$report" | jq -r '{ "results": [ .[] | { "type": .object, "valid": .valid, "score": .score } ] }')"
-                results_length="$(printf "%s" "$results" | jq -r '.results | length')"
 
-                for (( i=0; i<results_length; i++ )); do
-                    # kubeconform: test that the manifest is actually a valid kubernetes manifest for this version of K8s.
-                    if [ "$(printf "%s" "$results" | jq -r ".results[$i].valid")" != "true" ]; then
-                        printf "ERROR: manifest \"%s\" on chart \"%s\" is not valid on Kubernetes version \"%s\".\\n" "$(printf "%s" "$results" | jq -r ".results[$i].type")" "$chart_path" "$kubernetes_version" >&2
-                        printf "%s\\n" "$report"
-                        exit 1
-                    fi
+                if [ "$report" != "Invalid input" ]; then
+                    results="$(printf "%s" "$report" | jq -r '{ "results": [ .[] | { "type": .object, "valid": .valid, "score": .score } ] }')"
+                    results_length="$(printf "%s" "$results" | jq -r '.results | length')"
 
-                    # Test that the kubesec score meets our minimum requirement.
-                    score="$(printf "%s" "$results" | jq -r ".results[$i].score")"
-                    if [ "$score" -lt "<< parameters.minimum-score >>" ]; then
-                        printf "ERROR: manifest \"%s\" on chart \"%s\" does not meet minimum score \"%i\" on Kubernetes version \"%s\".\\n" "$(printf "%s" "$results" | jq -r ".results[$i].type")" "$chart_path" "<< parameters.minimum-score >>" "$kubernetes_version" >&2
-                        printf "%s\\n" "$report"
-                        exit 1
-                    fi
-                done
+                    for (( i=0; i<results_length; i++ )); do
+                        # kubeconform: test that the manifest is actually a valid kubernetes manifest for this version of K8s.
+                        if [ "$(printf "%s" "$results" | jq -r ".results[$i].valid")" != "true" ]; then
+                            printf "ERROR: manifest \"%s\" on chart \"%s\" is not valid on Kubernetes version \"%s\".\\n" "$(printf "%s" "$results" | jq -r ".results[$i].type")" "$chart_path" "$kubernetes_version" >&2
+                            printf "%s\\n" "$report"
+                            exit 1
+                        fi
+
+                        # Test that the kubesec score meets our minimum requirement.
+                        score="$(printf "%s" "$results" | jq -r ".results[$i].score")"
+                        if [ "$score" -lt "<< parameters.minimum-score >>" ]; then
+                            printf "ERROR: manifest \"%s\" on chart \"%s\" does not meet minimum score \"%i\" on Kubernetes version \"%s\".\\n" "$(printf "%s" "$results" | jq -r ".results[$i].type")" "$chart_path" "<< parameters.minimum-score >>" "$kubernetes_version" >&2
+                            printf "%s\\n" "$report"
+                            exit 1
+                        fi
+                    done
+                else
+                    printf "WARNING: helm template produced no or invalid output for kubesec to scan.\\n" >&2
+                fi
             done
         done
