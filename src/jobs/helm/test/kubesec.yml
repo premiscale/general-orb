@@ -85,7 +85,7 @@ steps:
                         fi
                     done
                 else
-                    printf "WARNING: helm template produced no or invalid output for kubesec to scan.\\n" >&2
+                    printf "WARNING: 'helm template' produced no or invalid output for kubesec to scan.\\n" >&2
                 fi
             done
         done
