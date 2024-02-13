@@ -36,7 +36,8 @@ parameters:
       - large
       - xlarge
       - 2xlarge
-      - premiscale/on-premise
+      - premiscale/small
+      - premiscale/medium
     default: small
   repo:
     description: Nexus Helm repository URL.
