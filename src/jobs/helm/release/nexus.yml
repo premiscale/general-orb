@@ -9,7 +9,8 @@ parameters:
       - large
       - xlarge
       - 2xlarge
-      - premiscale/on-premise
+      - premiscale/small
+      - premiscale/medium
     default: small
   executor:
     description: Executor image to run as.

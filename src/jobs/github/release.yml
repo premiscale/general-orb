@@ -11,7 +11,8 @@ parameters:
       - large
       - xlarge
       - 2xlarge
-      - premiscale/on-premise
+      - premiscale/small
+      - premiscale/medium
     default: small
     description: Resource class to run as.
   executor:
