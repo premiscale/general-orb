@@ -1,5 +1,5 @@
 description: |
-  Login to Docker registry
+  Login to a Nexus-like Docker registry
 parameters:
   username:
     description: Docker username.
