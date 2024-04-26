@@ -90,5 +90,5 @@ steps:
         - run:
             name: Push commit tag
             command: |+
-              docker tag << parameters.image-name >>:"$_DOCKER_TAG" << parameters.organization >>/<< parameters.image-name >>:$CIRCLE_SHA1
+              docker tag << parameters.organization >>/<< parameters.image-name >>:"$_DOCKER_TAG" << parameters.organization >>/<< parameters.image-name >>:$CIRCLE_SHA1
               docker push << parameters.organization >>/<< parameters.image-name >>:$CIRCLE_SHA1

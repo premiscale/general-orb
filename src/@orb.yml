@@ -11,3 +11,4 @@ display:
 orbs:
   helm: circleci/helm@2.0.1
   circleci-cli: circleci/circleci-cli@0.1.9
+  aws-cli: circleci/aws-cli@4.1.3
