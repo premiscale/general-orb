@@ -17,7 +17,7 @@ parameters:
     default: medium
     description: Resource class to run as.
   image-name:
-    description: Name of the image.
+    description: Name of the image, and also the ECR repository.
     default: ''
     type: string
   tag:
@@ -56,10 +56,6 @@ parameters:
     description: AWS Account ID.
     type: string
     default: $AWS_ACCOUNT_ID
-  aws-ecr-name:
-    description: AWS ECR (registry) name.
-    type: string
-    default: develop
   aws-cli-version:
     description: Version of the AWS CLI to install.
     type: string
@@ -76,6 +72,16 @@ steps:
       name: Docker login (ECR via 'aws ecr')
       command: |+
         aws ecr get-login-password --region << parameters.aws-region >> | docker login --username AWS --password-stdin << parameters.aws-account-id >>.dkr.ecr.<< parameters.aws-region >>.amazonaws.com
+  - run:
+      name: Check ECR repository target
+      command: |+
+        # If it does not exist, just create it.
+        if [ -z "$(aws ecr describe-repositories | jq -rMC ".repositories[] | select(.repositoryName == \"<< parameters.image-name >>\") | .repositoryName")" ]; then
+            printf "WARNING: Repository \"<< parameters.image-name >>\" does not exist. Creating.\\n" >&2
+            aws ecr create-repository --repository-name "<< parameters.image-name >>"
+        else
+            printf "INFO: Repository \"<< parameters.image-name >>\" already exists.\\n"
+        fi
   - run:
       name: Build and push tag
       command: |+
