@@ -108,19 +108,15 @@ steps:
             docker build . -f ./<< parameters.path >> -t << parameters.aws-account-id >>.dkr.ecr.<< parameters.aws-region >>.amazonaws.com/<< parameters.image-name >>:"$_DOCKER_TAG" << parameters.args >>
             docker push << parameters.aws-account-id >>.dkr.ecr.<< parameters.aws-region >>.amazonaws.com/<< parameters.image-name >>:"$_DOCKER_TAG"
         fi
-  - when:
-      condition: << parameters.commit-tag >>
-      steps:
-        - run:
-            name: Push commit tag
-            command: |+
-              docker tag << parameters.aws-account-id >>.dkr.ecr.<< parameters.aws-region >>.amazonaws.com/<< parameters.image-name >>:"$_DOCKER_TAG" << parameters.aws-account-id >>.dkr.ecr.<< parameters.aws-region >>.amazonaws.com/<< parameters.image-name >>:$CIRCLE_SHA1
-              docker push << parameters.aws-account-id >>.dkr.ecr.<< parameters.aws-region >>.amazonaws.com/<< parameters.image-name >>:$CIRCLE_SHA1
-  - when:
-      condition: << parameters.branch-tag >>
-      steps:
-        - run:
-            name: Push branch tag
-            command: |+
-              docker tag << parameters.aws-account-id >>.dkr.ecr.<< parameters.aws-region >>.amazonaws.com/<< parameters.image-name >>:"$_DOCKER_TAG" << parameters.aws-account-id >>.dkr.ecr.<< parameters.aws-region >>.amazonaws.com/<< parameters.image-name >>:$CIRCLE_BRANCH
-              docker push << parameters.aws-account-id >>.dkr.ecr.<< parameters.aws-region >>.amazonaws.com/<< parameters.image-name >>:$CIRCLE_BRANCH
+
+        if [ "<< parameters.commit-tag >>" = "true" ]; then
+            printf "INFO: Pushing Docker image tag based on git commit SHA at user's request.\\n"
+            docker tag << parameters.aws-account-id >>.dkr.ecr.<< parameters.aws-region >>.amazonaws.com/<< parameters.image-name >>:"$_DOCKER_TAG" << parameters.aws-account-id >>.dkr.ecr.<< parameters.aws-region >>.amazonaws.com/<< parameters.image-name >>:$CIRCLE_SHA1
+            docker push << parameters.aws-account-id >>.dkr.ecr.<< parameters.aws-region >>.amazonaws.com/<< parameters.image-name >>:$CIRCLE_SHA1
+        fi
+
+        if [ "<< parameters.branch-tag >>" = "true" ]; then
+            printf "INFO: Pushing Docker image tag based on git branch name at user's request.\\n"
+            docker tag << parameters.aws-account-id >>.dkr.ecr.<< parameters.aws-region >>.amazonaws.com/<< parameters.image-name >>:"$_DOCKER_TAG" << parameters.aws-account-id >>.dkr.ecr.<< parameters.aws-region >>.amazonaws.com/<< parameters.image-name >>:$CIRCLE_BRANCH
+            docker push << parameters.aws-account-id >>.dkr.ecr.<< parameters.aws-region >>.amazonaws.com/<< parameters.image-name >>:$CIRCLE_BRANCH
+        fi
