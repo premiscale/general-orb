@@ -1,7 +1,7 @@
 description: Docker build / machine executor.
 parameters:
   tag:
-    default: 2204:2022.07.1
+    default: 2204:2024.01.2
     description: Ubuntu version string to use.
     type: string
   caching:
