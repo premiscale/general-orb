@@ -141,4 +141,4 @@ steps:
   - run:
       name: Helm push
       command: |+
-        helm push << parameters.path >>/*.tgz oci://<< parameters.aws-account-id >>.dkr.ecr.<< parameters.aws-region >>.amazonaws.com/
+        helm push << parameters.path >>/*.tgz oci://<< parameters.aws-account-id >>.dkr.ecr.<< parameters.aws-region >>.amazonaws.com/charts/
