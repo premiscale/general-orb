@@ -16,6 +16,10 @@ parameters:
     description: Executor image to run as.
     default: default
     type: executor
+  chart-name:
+    description: Name of the Helm chart, and also the ECR repository.
+    default: $CIRCLE_PROJECT_REPONAME
+    type: string
   helm-version:
     description: Helm version to install.
     type: string
@@ -103,16 +107,16 @@ steps:
       name: Check ECR repository target
       command: |+
         # If it does not exist, just create it.
-        if [ -z "$(aws ecr describe-repositories | jq -rMC ".repositories[] | select(.repositoryName == \"<< parameters.image-name >>\") | .repositoryName")" ]; then
-            printf "WARNING: Repository \"<< parameters.image-name >>\" does not exist. Creating.\\n" >&2
+        if [ -z "$(aws ecr describe-repositories | jq -rMC ".repositories[] | select(.repositoryName == \"<< parameters.chart-name >>\") | .repositoryName")" ]; then
+            printf "WARNING: Repository \"<< parameters.chart-name >>\" does not exist. Creating.\\n" >&2
             if [ "<< parameters.immutable-repository >>" = "true" ]; then
                 printf "INFO: Creating image tag immutable repository.\\n"
-                aws ecr create-repository --repository-name "<< parameters.image-name >>" --image-tag-mutability IMMUTABLE
+                aws ecr create-repository --repository-name "<< parameters.chart-name >>" --image-tag-mutability IMMUTABLE
             else
-                aws ecr create-repository --repository-name "<< parameters.image-name >>" --image-tag-mutability MUTABLE
+                aws ecr create-repository --repository-name "<< parameters.chart-name >>" --image-tag-mutability MUTABLE
             fi
         else
-            printf "INFO: Repository \"<< parameters.image-name >>\" already exists.\\n"
+            printf "INFO: Repository \"<< parameters.chart-name >>\" already exists.\\n"
         fi
   - unless:
       condition:
