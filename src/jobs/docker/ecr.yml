@@ -65,7 +65,7 @@ parameters:
     type: string
     default: latest
   immutable-repository:
-    description: Ensure image tags are immutable in an ECR repository if it has to create the repository.
+    description: Ensure image tags are immutable in an ECR repository if it has to create the repository..
     type: boolean
     default: false
   buildkit:
