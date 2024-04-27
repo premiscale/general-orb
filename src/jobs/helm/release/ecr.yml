@@ -108,16 +108,16 @@ steps:
         # Respect the package name set by the user in the Chart.yaml.
         _CHART_NAME="$(yq '.name' << parameters.path >>/Chart.yaml)"
 
-        if [ -z "$(aws ecr describe-repositories | jq -rMC ".repositories[] | select(.repositoryName == \"$_CHART_NAME\") | .repositoryName")" ]; then
-            printf "WARNING: Repository \"$_CHART_NAME\" does not exist. Creating.\\n" >&2
+        if [ -z "$(aws ecr describe-repositories | jq -rMC ".repositories[] | select(.repositoryName == \"charts/$_CHART_NAME\") | .repositoryName")" ]; then
+            printf "WARNING: Repository \"charts/$_CHART_NAME\" does not exist. Creating.\\n" >&2
             if [ "<< parameters.immutable-repository >>" = "true" ]; then
                 printf "INFO: Creating image tag immutable repository.\\n"
-                aws ecr create-repository --repository-name "$_CHART_NAME" --image-tag-mutability IMMUTABLE
+                aws ecr create-repository --repository-name "charts/${_CHART_NAME}" --image-tag-mutability IMMUTABLE
             else
-                aws ecr create-repository --repository-name "$_CHART_NAME" --image-tag-mutability MUTABLE
+                aws ecr create-repository --repository-name "charts/${_CHART_NAME}" --image-tag-mutability MUTABLE
             fi
         else
-            printf "INFO: Repository \"$_CHART_NAME\" already exists.\\n"
+            printf "INFO: Repository \"charts/$_CHART_NAME\" already exists.\\n"
         fi
   - unless:
       condition:
