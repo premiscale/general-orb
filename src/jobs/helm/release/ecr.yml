@@ -1,5 +1,5 @@
 description: |+
-  Publish Helm packages to Nexus hosted Helm repositories.
+  Publish Helm packages to AWS ECR hosted Helm repositories.
 parameters:
   resource-class:
     type: enum
@@ -44,24 +44,43 @@ parameters:
     description: If path is different from .image.tag, update the path here for yq.
     default: .image.tag
     type: string
-  username:
-    description: Nexus Helm repository username.
-    type: string
-    default: $HELM_USERNAME
-  password:
-    description: Nexus Helm repository password.
-    type: string
-    default: $HELM_PASSWORD
   pre-command:
     description: Run a command prior to packaging.
     type: string
     default: ''
+  aws-access-key-id:
+    description: AWS Access Key ID.
+    type: string
+    default: $AWS_ACCESS_KEY_ID
+  aws-secret-access-key:
+    description: AWS Secret Access Key ID.
+    type: string
+    default: $AWS_SECRET_ACCESS_KEY
+  aws-region:
+    description: Region of the ECR registry.
+    type: string
+    default: $AWS_DEFAULT_REGION
+  aws-account-id:
+    description: AWS Account ID.
+    type: string
+    default: $AWS_ACCOUNT_ID
+  aws-cli-version:
+    description: Version of the AWS CLI to install.
+    type: string
+    default: latest
+  immutable-repository:
+    description: Ensure image tags are immutable in an ECR repository if it has to create the repository.
+    type: boolean
+    default: false
 executor: << parameters.executor >>
 resource_class: << parameters.resource-class >>
 steps:
   - checkout
   - helm/install-helm-client:
       version: << parameters.helm-version >>
+  - aws-cli/install:
+      version: << parameters.aws-cli-version >>
+  # Optionally install yq for updating the Helm chart image tag.
   - unless:
       condition:
         equal: [<< parameters.image-tag >>, '']
@@ -76,6 +95,25 @@ steps:
                   export _DOCKER_TAG="<< parameters.image-tag >>"
               fi
               yq -i "<< parameters.image-tag-path >> = \"$_DOCKER_TAG\"" << parameters.path >>/values.yaml
+  - run:
+      name: Helm registry login (ECR via 'aws ecr')
+      command: |+
+        aws ecr get-login-password --region << parameters.aws-region >> | helm registry login --username AWS --password-stdin << parameters.aws-account-id >>.dkr.ecr.<< parameters.aws-region >>.amazonaws.com
+  - run:
+      name: Check ECR repository target
+      command: |+
+        # If it does not exist, just create it.
+        if [ -z "$(aws ecr describe-repositories | jq -rMC ".repositories[] | select(.repositoryName == \"<< parameters.image-name >>\") | .repositoryName")" ]; then
+            printf "WARNING: Repository \"<< parameters.image-name >>\" does not exist. Creating.\\n" >&2
+            if [ "<< parameters.immutable-repository >>" = "true" ]; then
+                printf "INFO: Creating image tag immutable repository.\\n"
+                aws ecr create-repository --repository-name "<< parameters.image-name >>" --image-tag-mutability IMMUTABLE
+            else
+                aws ecr create-repository --repository-name "<< parameters.image-name >>" --image-tag-mutability MUTABLE
+            fi
+        else
+            printf "INFO: Repository \"<< parameters.image-name >>\" already exists.\\n"
+        fi
   - unless:
       condition:
         equal: [<< parameters.pre-command >>, '']
@@ -84,7 +122,7 @@ steps:
             name: Pre-command
             command: << parameters.pre-command >>
   - run:
-      name: 'nexus-helm: package'
+      name: Helm package
       command: |+
         if [ -n "<< parameters.version >>" ] && [ -n "<< parameters.app-version >>" ]; then
             helm package << parameters.path >> --dependency-update --version << parameters.version >> --app-version << parameters.app-version >> --destination << parameters.path >>
@@ -96,6 +134,6 @@ steps:
             helm package << parameters.path >> --dependency-update --destination << parameters.path >>
         fi
   - run:
-      name: 'nexus-helm: upload'
+      name: Helm push
       command: |+
-        curl -u "<< parameters.username >>":"<< parameters.password >>" << parameters.repo >> --upload-file << parameters.path >>/*.tgz
+        helm push << parameters.path >>/*.tgz oci://<< parameters.aws-account-id >>.dkr.ecr.<< parameters.aws-region >>.amazonaws.com/
