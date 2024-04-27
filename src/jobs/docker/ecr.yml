@@ -86,7 +86,7 @@ steps:
         # If it does not exist, just create it.
         if [ -z "$(aws ecr describe-repositories | jq -rMC ".repositories[] | select(.repositoryName == \"<< parameters.image-name >>\") | .repositoryName")" ]; then
             printf "WARNING: Repository \"<< parameters.image-name >>\" does not exist. Creating.\\n" >&2
-            if [ "<< parameters.ecr-immutable-repository >>" = "true" ]; then
+            if [ "<< parameters.immutable-repository >>" = "true" ]; then
                 printf "INFO: Creating image tag immutable repository.\\n"
                 aws ecr create-repository --repository-name "<< parameters.image-name >>" --image-tag-mutability IMMUTABLE
             else
