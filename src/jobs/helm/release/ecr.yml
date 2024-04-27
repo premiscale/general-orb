@@ -88,12 +88,13 @@ steps:
         - utils-install-yq
         - run:
             name: Update image tag
-            command: |
+            command: |+
               if [[ "<< parameters.image-tag >>" =~ v[0-9]+.[0-9]+.[0-9]+ ]]; then
                   export _DOCKER_TAG="$(printf "%s" "<< parameters.image-tag >>" | grep -oP "(?<=v).*" | awk NF)"
               else
                   export _DOCKER_TAG="<< parameters.image-tag >>"
               fi
+
               yq -i "<< parameters.image-tag-path >> = \"$_DOCKER_TAG\"" << parameters.path >>/values.yaml
   - run:
       name: Helm registry login (ECR via 'aws ecr')
