@@ -12,14 +12,14 @@ workflows:
   example:
     jobs:
       - general/github-release:
-            context:
-              - github
-              - circleci
-            filters:
-              branches:
-                ignore: /.*/
-              tags:
-                only: /^v?[0-9]+\.[0-9]+\.[0-9]+$/
+          context:
+            - github
+            - circleci
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v?[0-9]+\.[0-9]+\.[0-9]+$/
 ```
 
 ## Development
