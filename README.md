@@ -15,7 +15,6 @@ workflows:
             context:
               - github
               - circleci
-            gh-version: 2.34.0
             filters:
               branches:
                 ignore: /.*/
