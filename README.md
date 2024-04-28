@@ -2,6 +2,27 @@
 
 This orb is a collection of useful commands and jobs we can reuse in many repositories to simplify configs and reduce code duplication in [dynamically-continued](https://github.com/emmeowzing/dynamic-continuation-orb) pipelines.
 
+## Usage
+
+```yaml
+orbs:
+  general: premiscale/general@<latest version>
+
+workflows:
+  example:
+    jobs:
+      - general/github-release:
+            context:
+              - github
+              - circleci
+            gh-version: 2.34.0
+            filters:
+              branches:
+                ignore: /.*/
+              tags:
+                only: /^v?[0-9]+\.[0-9]+\.[0-9]+$/
+```
+
 ## Development
 
 This orb has been developed in _unpacked_ form. You may view its packed source with
