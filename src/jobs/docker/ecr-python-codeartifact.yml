@@ -1,0 +1,142 @@
+description: |+
+  Build an push a Docker image that depends on a Python artifact from AWS CodeArtifact to AWS ECR.
+
+  This job is exactly the same as docker-ecr, but with the added step of pull a PYTHON_PASSWORD env var from AWS to authenticate with AWS CodeArtifact within the Docker container.
+
+  Requires a context with $AWS_ACCESS_KEY_ID, $AWS_SECRET_ACCESS_KEY, $AWS_DEFAULT_REGION, $AWS_ACCOUNT_ID set.
+executor:
+  name: machine
+  caching: << parameters.docker-layer-caching >>
+resource_class: << parameters.resource-class >>
+parameters:
+  resource-class:
+    type: enum
+    enum:
+      - medium
+      - large
+      - xlarge
+      - 2xlarge
+    default: medium
+    description: Resource class to run as.
+  image-name:
+    description: Name of the image, and also the ECR repository.
+    default: ''
+    type: string
+  tag:
+    description: Name of the tag for the image.
+    default: latest
+    type: string
+  commit-tag:
+    description: Whether or not to push an additional tag to the registry with the commit hash as the tag.
+    default: false
+    type: boolean
+  branch-tag:
+    description: Whether or not to push an additional tag to the registry with the branch name as the tag.
+    default: false
+    type: boolean
+  docker-layer-caching:
+    description: Enable DLC on the machine executor. Costs 200 credits / run, however.
+    default: false
+    type: boolean
+  args:
+    description: Additional args string to add to the build command. (E.g., '--build-arg=HELLO=WORLD'.)
+    default: ''
+    type: string
+  path:
+    description: Path to a particular Dockerfile or containing directory with a Dockerfile present.
+    default: Dockerfile
+    type: string
+  aws-access-key-id:
+    description: AWS Access Key ID.
+    type: string
+    default: $AWS_ACCESS_KEY_ID
+  aws-secret-access-key:
+    description: AWS Secret Access Key ID.
+    type: string
+    default: $AWS_SECRET_ACCESS_KEY
+  aws-region:
+    description: Region of the ECR registry.
+    type: string
+    default: $AWS_DEFAULT_REGION
+  aws-codeartifact-domain:
+    description: AWS CodeArtifact domain.
+    type: string
+    default: $PYTHON_REPOSITORY
+  aws-account-id:
+    description: AWS Account ID.
+    type: string
+    default: $AWS_ACCOUNT_ID
+  aws-cli-version:
+    description: Version of the AWS CLI to install.
+    type: string
+    default: latest
+  immutable-repository:
+    description: Ensure image tags are immutable in an ECR repository if it has to create the repository..
+    type: boolean
+    default: false
+  buildkit:
+    description: Enable buildkit (https://docs.docker.com/build/buildkit/#getting-started).
+    type: boolean
+    default: true
+steps:
+  - checkout
+  - utils/install-jq
+  - aws-cli/install:
+      version: << parameters.aws-cli-version >>
+  - run:
+      name: Docker login (ECR via 'aws ecr')
+      command: |+
+        aws ecr get-login-password --region << parameters.aws-region >> | docker login --username AWS --password-stdin << parameters.aws-account-id >>.dkr.ecr.<< parameters.aws-region >>.amazonaws.com
+  - run:
+      name: Check ECR repository target
+      command: |+
+        # If it does not exist, just create it.
+        if [ -z "$(aws ecr describe-repositories | jq -rMC ".repositories[] | select(.repositoryName == \"<< parameters.image-name >>\") | .repositoryName")" ]; then
+            printf "WARNING: Repository \"<< parameters.image-name >>\" does not exist. Creating.\\n" >&2
+            if [ "<< parameters.immutable-repository >>" = "true" ]; then
+                printf "INFO: Creating image tag immutable repository.\\n"
+                aws ecr create-repository --repository-name "<< parameters.image-name >>" --image-tag-mutability IMMUTABLE
+            else
+                aws ecr create-repository --repository-name "<< parameters.image-name >>" --image-tag-mutability MUTABLE
+            fi
+        else
+            printf "INFO: Repository \"<< parameters.image-name >>\" already exists.\\n"
+        fi
+  - run:
+      name: Build and push tag
+      command: |+
+        if [[ "<< parameters.tag >>" =~ v[0-9]+.[0-9]+.[0-9]+ ]]; then
+            export _DOCKER_TAG="$(printf "%s" "<< parameters.tag >>" | grep -oP "(?<=v).*" | awk NF)"
+        else
+            export _DOCKER_TAG="<< parameters.tag >>"
+        fi
+
+        if [ "<< parameters.buildkit >>" = "true" ]; then
+            export DOCKER_BUILDKIT=1
+        fi
+
+        # PYTHON_PASSWORD has to be retrieved from AWS CodeArtifact for the build to succeed.
+        PYTHON_PASSWORD="$(aws --region << parameters.aws-region >> codeartifact get-authorization-token --domain << parameters.aws-codeartifact-domain >> --domain-owner << parameters.aws-account-id >> --query authorizationToken --output text)"
+        export PYTHON_PASSWORD
+
+        if [ "$(echo "<< parameters.path >>" | grep -oP "Dockerfile")" != "Dockerfile" ]; then
+            # Path does not contain the dockerfile, so we default to "Dockerfile".
+            docker build . -f ./<< parameters.path >>/Dockerfile --build-arg=PYTHON_PASSWORD="$PYTHON_PASSWORD" -t << parameters.aws-account-id >>.dkr.ecr.<< parameters.aws-region >>.amazonaws.com/<< parameters.image-name >>:"$_DOCKER_TAG" << parameters.args >>
+            docker push << parameters.aws-account-id >>.dkr.ecr.<< parameters.aws-region >>.amazonaws.com/<< parameters.image-name >>:"$_DOCKER_TAG"
+        else
+            # Path does specify the Dockerfile explictly, don't default to "Dockerfile". E.g., "docker/Dockerfile.develop".
+            docker build . -f ./<< parameters.path >> --build-arg=PYTHON_PASSWORD="$PYTHON_PASSWORD" -t << parameters.aws-account-id >>.dkr.ecr.<< parameters.aws-region >>.amazonaws.com/<< parameters.image-name >>:"$_DOCKER_TAG" << parameters.args >>
+            docker push << parameters.aws-account-id >>.dkr.ecr.<< parameters.aws-region >>.amazonaws.com/<< parameters.image-name >>:"$_DOCKER_TAG"
+        fi
+
+        if [ "<< parameters.commit-tag >>" = "true" ]; then
+            printf "INFO: Pushing Docker image tag based on git commit SHA at user's request.\\n"
+            docker tag << parameters.aws-account-id >>.dkr.ecr.<< parameters.aws-region >>.amazonaws.com/<< parameters.image-name >>:"$_DOCKER_TAG" << parameters.aws-account-id >>.dkr.ecr.<< parameters.aws-region >>.amazonaws.com/<< parameters.image-name >>:$CIRCLE_SHA1
+            docker push << parameters.aws-account-id >>.dkr.ecr.<< parameters.aws-region >>.amazonaws.com/<< parameters.image-name >>:$CIRCLE_SHA1
+        fi
+
+        if [ "<< parameters.branch-tag >>" = "true" ]; then
+            printf "INFO: Pushing Docker image tag based on git branch name at user's request.\\n"
+            docker tag << parameters.aws-account-id >>.dkr.ecr.<< parameters.aws-region >>.amazonaws.com/<< parameters.image-name >>:"$_DOCKER_TAG" << parameters.aws-account-id >>.dkr.ecr.<< parameters.aws-region >>.amazonaws.com/<< parameters.image-name >>:$CIRCLE_BRANCH
+            docker push << parameters.aws-account-id >>.dkr.ecr.<< parameters.aws-region >>.amazonaws.com/<< parameters.image-name >>:$CIRCLE_BRANCH
+        fi
