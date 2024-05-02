@@ -1,0 +1,25 @@
+description: |+
+  Start a Minikube cluster.
+parameters:
+  kubernetes-version:
+    description: Kubernetes version to install.
+    type: string
+    default: 1.28.3
+  project-name:
+    description: Name of the project.
+    type: string
+    default: $CIRCLE_PROJECT
+steps:
+  - run:
+      name: Start minikube
+      command: |+
+        minikube start \
+        -p << parameters.project-name >> \
+        --kubernetes-version v<< parameters.kubernetes-version >> \
+        --extra-config=kubelet.runtime-request-timeout=40m \
+        --addons=ingress \
+        --addons=metallb \
+        --addons=metrics-server
+
+        minikube kubectl -p pass-operator get nodes -o wide
+        minikube kubectl -p pass-operator get pods -A

@@ -1,0 +1,12 @@
+description: |+
+  Stop a Minikube cluster.
+parameters:
+  project-name:
+    description: Name of the project.
+    type: string
+    default: $CIRCLE_PROJECT
+steps:
+  - run:
+      name: Start minikube
+      command: |+
+        minikube stop -p << parameters.project-name >>
