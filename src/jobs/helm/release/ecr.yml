@@ -105,7 +105,7 @@ steps:
 
               yq -i "<< parameters.image-tag-path >> = \"$_DOCKER_TAG\"" << parameters.path >>/values.yaml
   - run:
-      name: Update Chart version
+      name: Update Chart name
       command: |+
         if [ -n "<< parameters.chart-name-prefix >>" ]; then
             printf "INFO: Updating chart name at \"<< parameters.path >>/Chart.yaml\" to have prefix \"<< parameters.chart-name-prefix >>-\"\\n"
