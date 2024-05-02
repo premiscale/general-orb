@@ -80,7 +80,7 @@ parameters:
     default: true
 steps:
   - checkout
-  - utils/install-jq
+  - utils-install-jq
   - aws-cli/install:
       version: << parameters.aws-cli-version >>
   - run:
