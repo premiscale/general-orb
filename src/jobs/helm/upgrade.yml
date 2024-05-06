@@ -34,6 +34,10 @@ parameters:
     default: $CLUSTER
     type: string
     description: Cluster name to connect to.
+  loft:
+    description: Authenticate with Loft.
+    type: boolean
+    default: false
   loft-access-key:
     default: $LOFT_ACCESS_KEY
     type: string
@@ -94,10 +98,13 @@ steps:
       repo-name: << parameters.repo-name >>
       username: << parameters.username >>
       password: << parameters.password >>
-  - loft-connect:
-      cluster: << parameters.cluster >>
-      loft-access-key: << parameters.loft-access-key >>
-      loft-url: << parameters.loft-url >>
+  - when:
+      condition: << parameters.loft >>
+      steps:
+        - loft-connect:
+            cluster: << parameters.cluster >>
+            loft-access-key: << parameters.loft-access-key >>
+            loft-url: << parameters.loft-url >>
   - run:
       name: Helm upgrade --install
       command: |+

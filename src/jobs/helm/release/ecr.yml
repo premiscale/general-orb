@@ -48,6 +48,14 @@ parameters:
     description: Run a command prior to packaging.
     type: string
     default: ''
+  chart-name-prefix:
+    description: A lot of times, Helm charts will have the same name as the project, and Docker artifacts are generated alongside Helm charts.
+    type: string
+    default: ''
+  chart-name-postfix:
+    description: A lot of times, Helm charts will have the same name as the project, and Docker artifacts are generated alongside Helm charts.
+    type: string
+    default: ''
   aws-access-key-id:
     description: AWS Access Key ID.
     type: string
@@ -97,6 +105,18 @@ steps:
 
               yq -i "<< parameters.image-tag-path >> = \"$_DOCKER_TAG\"" << parameters.path >>/values.yaml
   - run:
+      name: Update Chart name
+      command: |+
+        if [ -n "<< parameters.chart-name-prefix >>" ]; then
+            printf "INFO: Updating chart name at \"<< parameters.path >>/Chart.yaml\" to have prefix \"<< parameters.chart-name-prefix >>-\"\\n"
+            yq -i '.name = ("<< parameters.chart-name-prefix >>-" + .name)' << parameters.path >>/Chart.yaml
+        fi
+
+        if [ -n "<< parameters.chart-name-postfix >>" ]; then
+            printf "INFO: Updating chart name at \"<< parameters.path >>/Chart.yaml\" to have postfix \"-<< parameters.chart-name-postfix >>\"\\n"
+            yq -i '.name = (.name + "-<< parameters.chart-name-postfix >>")' << parameters.path >>/Chart.yaml
+        fi
+  - run:
       name: Helm registry login (ECR via 'aws ecr')
       command: |+
         aws ecr get-login-password --region << parameters.aws-region >> | helm registry login --username AWS --password-stdin << parameters.aws-account-id >>.dkr.ecr.<< parameters.aws-region >>.amazonaws.com
@@ -129,6 +149,7 @@ steps:
   - run:
       name: Helm package
       command: |+
+        # Handle version specifications.
         if [ -n "<< parameters.version >>" ] && [ -n "<< parameters.app-version >>" ]; then
             helm package << parameters.path >> --dependency-update --version << parameters.version >> --app-version << parameters.app-version >> --destination << parameters.path >>
         elif [ -n "<< parameters.version >>" ] && [ -z "<< parameters.app-version >>" ]; then
