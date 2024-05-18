@@ -44,14 +44,14 @@ steps:
       steps:
         - run:
             name: kubelinter
-            description: Run kubelinter against all charts in a repository.
+            description: Run kubelinter
             command: |+
-              kubelinter lint . --exclude << parameters.exclude >>
+              kubelinter lint << parameters.path >> --exclude << parameters.exclude >>
   - unless:
       condition: << parameters.exclude >>
       steps:
         - run:
             name: kubelinter
-            description: Run kubelinter against all charts in a repository.
+            description: Run kubelinter
             command: |+
-              kubelinter lint .
+              kubelinter lint << parameters.path >>
