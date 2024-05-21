@@ -39,7 +39,7 @@ parameters:
     type: string
     default: $CIRCLE_PROJECT_REPONAME
   cosign:
-    description: Cosign releases.
+    description: Cosign releases. This flag also enables caching, so be sure to enable caching on other artifacts-generating jobs.
     type: boolean
     default: false
   cosign-version:
@@ -55,10 +55,12 @@ parameters:
     type: string
     default: /artifacts
   cosign-docker-image-tag:
-    description: Docker image tag to sign.
+    description: |+
+      Docker image tag to sign. At this time, this orb only supports signing one Docker image.
+
+      Note: Docker images are not uploaded as artifacts with the release.
     type: string
     default: ''
-
 steps:
   - checkout
   - run:
@@ -66,6 +68,7 @@ steps:
       command: |+
         wget https://github.com/cli/cli/releases/download/v<< parameters.gh-version >>/gh_<< parameters.gh-version >>_linux_amd64.deb -O gh.deb
         sudo dpkg -i gh.deb
+  # This branch generates releases with both artifacts uploaded and signing-related artifacts with cosign.
   - when:
       condition: << parameters.cosign >>
       steps:
@@ -75,14 +78,18 @@ steps:
               wget https://github.com/sigstore/cosign/releases/download/v<< parameters.cosign-version >>/cosign-linux-amd64 -O cosign
               sudo install cosign /usr/bin/cosign
               rm cosign
+        - restore_cache:
+            keys:
+              - cosign-<< pipeline.
         - run:
             name: Generate cosign artifacts for release upload
             command: |+
               (
                   cd "<< parameters.cosign-artifacts-directory >>" || exit 1 \
-                  && find . -type f -exec cosign sign --key env://"<< parameters.cosign-key >>" {} \;
+                  && find . -type f -exec cosign sign --key env://"<< parameters.cosign-key >>" {} \; \
+                  && ls -lash
               )
-        # If there are user-specified docker artifacts, sign those too.
+        # If there are user-specified docker artifacts, sign those too, but don't upload them.
         - when:
             condition: << parameters.cosign-docker-image-tag >>
             steps:
@@ -90,15 +97,32 @@ steps:
                   name: Sign Docker image
                   command: |+
                     cosign sign --key env://"<< parameters.cosign-key >>" << parameters.cosign-docker-image-tag >>
-  - run:
-      name: Generate release
-      command: |+
-        # Get latest tag.
-        git fetch --all --tags
-        export LATEST_TAG="$(git tag | sort -V | tail -1)"
-        printf "Latest detected tag: %s\\n" "$LATEST_TAG"
+        # Generate the release and upload artifacts.
+        - run:
+            name: Generate release
+            command: |+
+              # Get latest tag.
+              git fetch --all --tags
+              export LATEST_TAG="$(git tag | sort -V | tail -1)"
+              printf "Latest detected tag: %s\\n" "$LATEST_TAG"
 
-        # Generate release from tag.
-        printf "<< parameters.token >>" | gh auth login --with-token 2>/dev/null || true
-        gh repo set-default "<< parameters.github-organization >>"/"<< parameters.github-project-name >>"
-        gh release create "$LATEST_TAG" --generate-notes
+              # Generate release from tag.
+              printf "<< parameters.token >>" | gh auth login --with-token 2>/dev/null || true
+              gh repo set-default "<< parameters.github-organization >>"/"<< parameters.github-project-name >>"
+              gh release create "$LATEST_TAG" --notes "Release $LATEST_TAG" --title "Release $LATEST_TAG" --notes-file "<< parameters.cosign-artifacts-directory >>/release-notes.md" --attach "<< parameters.cosign-artifacts-directory >>/*"
+  # This is the typical release generation step with no artifacts (just the standard source tarballs).
+  - unless:
+      condition: << parameters.cosign >>
+      steps:
+        - run:
+            name: Generate release
+            command: |+
+              # Get latest tag.
+              git fetch --all --tags
+              export LATEST_TAG="$(git tag | sort -V | tail -1)"
+              printf "Latest detected tag: %s\\n" "$LATEST_TAG"
+
+              # Generate release from tag.
+              printf "<< parameters.token >>" | gh auth login --with-token 2>/dev/null || true
+              gh repo set-default "<< parameters.github-organization >>"/"<< parameters.github-project-name >>"
+              gh release create "$LATEST_TAG" --generate-notes
