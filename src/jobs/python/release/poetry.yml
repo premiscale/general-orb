@@ -40,6 +40,10 @@ parameters:
     description: Override the version of the uploaded artifact in pyproject.toml.
     type: string
     default: $CIRCLE_TAG
+  cosign:
+    description: Cache locally-generated artifacts for code signing under `/artifacts`.
+    type: boolean
+    default: false
 steps:
   - checkout
   - python-install-poetry
@@ -77,3 +81,16 @@ steps:
         else
             twine upload dist/* -u << parameters.username >> -p << parameters.password >> --non-interactive
         fi
+  - when:
+      condition: << parameters.cosign >>
+      steps:
+        - run:
+            name: Copy artifacts to /artifacts
+            command: |
+              mkdir -p /artifacts
+              cp -r dist/* /artifacts/
+        - persist_to_workspace:
+            name: cosign-cache
+            root: /artifacts
+            paths:
+              - /artifacts/*

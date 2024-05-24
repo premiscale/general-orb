@@ -1,0 +1,17 @@
+description: Install cosign CLI
+parameters:
+  cosign-version:
+    description: The version of cosign to use.
+    type: string
+    default: 2.2.4
+  architecture:
+    description: The architecture to install cosign for.
+    type: string
+    default: linux-amd64
+steps:
+  - run:
+      name: Install cosign CLI
+      command: |+
+        wget https://github.com/sigstore/cosign/releases/download/v<< parameters.cosign-version >>/cosign-<< parameters.architecture >> -O cosign
+        sudo install cosign /usr/bin/cosign
+        rm cosign

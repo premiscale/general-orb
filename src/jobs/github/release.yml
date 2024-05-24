@@ -25,7 +25,7 @@ parameters:
 
       https://github.com/cli/cli/releases
     type: string
-    default: '2.28.0'
+    default: 2.28.0
   token:
     description: GitHub token to use with the gh-client.
     type: string
@@ -38,6 +38,51 @@ parameters:
     description: GitHub project name.
     type: string
     default: $CIRCLE_PROJECT_REPONAME
+  cosign:
+    description: Cosign releases. This flag also enables caching, so be sure to enable caching on other artifacts-generating jobs.
+    type: boolean
+    default: false
+  cosign-version:
+    description: Cosign release version to install.
+    type: string
+    default: 2.2.4
+  cosign-key:
+    description: |+
+      Private key to sign artifacts with.
+
+      Be sure to skip the '$' prefix in the environment variable name as it's not necessary. The 'cosign' tool just needs to know the environment variable's name.
+    type: string
+    default: COSIGN_PRIVATE_KEY
+  cosign-key-password:
+    description: |+
+      Password for the private key used for artifact signing. If this is set to COSIGN_PASSWORD, we can skip the prompt.
+
+      https://docs.sigstore.dev/key_management/signing_with_self-managed_keys/
+    type: string
+    default: $COSIGN_PASSWORD
+  cosign-artifacts-directory:
+    description: Directory in which artifacts are stored that need to be signed prior to release.
+    type: string
+    default: /artifacts
+  cosign-docker-image-tag:
+    description: |+
+      Docker image tag to sign. At this time, this orb only supports signing one Docker image.
+
+      Note: if you're signing a Docker image, you must also set the 'cosign' parameter to true, and apply a docker context with the following parameters' environment variables set.
+    type: string
+    default: ''
+  docker-username:
+    description: Docker username.
+    type: string
+    default: $DOCKER_USERNAME
+  docker-password:
+    description: Docker password.
+    type: string
+    default: $DOCKER_PASSWORD
+  docker-domain:
+    description: Docker registry URL.
+    type: string
+    default: $DOCKER_DOMAIN
 steps:
   - checkout
   - run:
@@ -46,13 +91,54 @@ steps:
         wget https://github.com/cli/cli/releases/download/v<< parameters.gh-version >>/gh_<< parameters.gh-version >>_linux_amd64.deb -O gh.deb
         sudo dpkg -i gh.deb
   - run:
-      name: Generate release
-      command: |
+      name: Configure git CLI
+      command: |+
         # Get latest tag.
         git fetch --all --tags
         export LATEST_TAG="$(git tag | sort -V | tail -1)"
-        echo "$LATEST_TAG"
+        printf "Latest detected tag: %s\\n" "$LATEST_TAG"
+
         # Generate release from tag.
-        echo "<< parameters.token >>" | gh auth login --with-token 2>/dev/null || true
+        printf "<< parameters.token >>" | gh auth login --with-token 2>/dev/null || true
         gh repo set-default "<< parameters.github-organization >>"/"<< parameters.github-project-name >>"
-        gh release create "$LATEST_TAG" --generate-notes
+  # This branch generates releases with both artifacts uploaded and signing-related artifacts with cosign.
+  - when:
+      condition: << parameters.cosign >>
+      steps:
+        - cosign-install:
+            cosign-version: << parameters.cosign-version >>
+        - attach_workspace:
+            at: /artifacts
+        - run:
+            name: Generate cosign artifacts for release upload
+            command: |+
+              (
+                  cd "<< parameters.cosign-artifacts-directory >>" || exit 1 \
+                  && find . -type f -exec cosign sign-blob --yes --key env://"<< parameters.cosign-key >>" {} --output-signature {}.sig \; \
+                  && ls -lash
+              )
+        # If there are user-specified docker artifacts, sign those too and upload the sig.
+        - when:
+            condition: << parameters.cosign-docker-image-tag >>
+            steps:
+              - docker-login:
+                  username: << parameters.docker-username >>
+                  password: << parameters.docker-password >>
+                  domain: << parameters.docker-domain >>
+              - run:
+                  name: Sign Docker image
+                  command: |+
+                    cosign sign --yes --key env://"<< parameters.cosign-key >>" << parameters.cosign-docker-image-tag >>
+        # Generate the release and upload artifacts.
+        - run:
+            name: Generate release
+            command: |+
+              gh release create "$LATEST_TAG" --generate-notes --attach "<< parameters.cosign-artifacts-directory >>/*"
+  # This is the typical release generation step with no artifacts (just the standard source tarballs).
+  - unless:
+      condition: << parameters.cosign >>
+      steps:
+        - run:
+            name: Generate release
+            command: |+
+              gh release create "$LATEST_TAG" --generate-notes

@@ -80,6 +80,10 @@ parameters:
     description: Ensure image tags are immutable in an ECR repository if it has to create the repository.
     type: boolean
     default: false
+  cosign:
+    description: Cache locally-generated artifacts for code signing under `/artifacts`.
+    type: boolean
+    default: false
 executor: << parameters.executor >>
 resource_class: << parameters.resource-class >>
 steps:
@@ -163,3 +167,16 @@ steps:
       name: Helm push
       command: |+
         helm push << parameters.path >>/*.tgz oci://<< parameters.aws-account-id >>.dkr.ecr.<< parameters.aws-region >>.amazonaws.com/
+  - when:
+      condition: << parameters.cosign >>
+      steps:
+        - run:
+            name: Copy artifacts to /artifacts
+            command: |
+              mkdir -p /artifacts
+              cp -r << parameters.path >>/*.tgz /artifacts/
+        - persist_to_workspace:
+            name: cosign-cache
+            root: /artifacts
+            paths:
+              - /artifacts/*
