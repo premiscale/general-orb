@@ -1,0 +1,33 @@
+description: |+
+  Verify a Docker image with cosign.
+parameters:
+  cosign-key:
+    description: The cosign key to use for signing.
+    type: string
+  cosign-version:
+    description: The version of cosign to use.
+    type: string
+    default: 2.2.4
+  docker-username:
+    description: Docker username.
+    type: string
+    default: $DOCKER_USERNAME
+  docker-password:
+    description: Docker password.
+    type: string
+    default: $DOCKER_PASSWORD
+  docker-domain:
+    description: Docker registry URL.
+    type: string
+    default: $DOCKER_DOMAIN
+steps:
+  - cosign-install:
+      cosign-version: << parameters.cosign-version >>
+  - docker-login:
+      username: << parameters.docker-username >>
+      password: << parameters.docker-password >>
+      domain: << parameters.docker-domain >>
+  - run:
+      name: Verify Docker image
+      command: |+
+        cosign verify --key env://"<< parameters.cosign-key >>" << parameters.docker-domain >>
