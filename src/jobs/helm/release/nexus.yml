@@ -56,6 +56,10 @@ parameters:
     description: Run a command prior to packaging.
     type: string
     default: ''
+  cosign:
+    description: Cache locally-generated artifacts for code signing under `/artifacts`.
+    type: boolean
+    default: false
 executor: << parameters.executor >>
 resource_class: << parameters.resource-class >>
 steps:
@@ -99,3 +103,16 @@ steps:
       name: 'nexus-helm: upload'
       command: |+
         curl -u "<< parameters.username >>":"<< parameters.password >>" << parameters.repo >> --upload-file << parameters.path >>/*.tgz
+  - when:
+      condition: << parameters.cosign >>
+      steps:
+        - run:
+            name: Copy artifacts to /artifacts
+            command: |
+              mkdir -p /artifacts
+              cp -r << parameters.path >>/*.tgz /artifacts/
+        - persist_to_workspace:
+            name: cosign-cache
+            root: /artifacts
+            paths:
+              - /artifacts/*
