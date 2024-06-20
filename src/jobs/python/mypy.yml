@@ -38,7 +38,16 @@ parameters:
     type: string
     description: Delimiter by which to split the dependencies string.
     default: ','
+  cache:
+    type: boolean
+    description: Use cache for .mypy_cache/.
+    default: true
 steps:
+  - when:
+      condition: << parameters.cache >>
+      steps:
+        - restore_cache:
+            key: mypy-cache-<< checksum("requirements.txt") >>-<< checksum("<< parameters.configuration_file >>") >>-<< checksum("<< parameters.modules_path >>") >>-<< checksum("<< parameters.mypy-args >>") >>-<< checksum("<< parameters.executor >>") >>
   - checkout
   - dependency-check:
       dependencies: << parameters.dependencies >>
@@ -53,3 +62,10 @@ steps:
         pip install --no-python-version-warning --disable-pip-version-check --upgrade mypy
         mypy --install-types --non-interactive || true
         mypy --config-file << parameters.configuration_file >> << parameters.mypy-args >> << parameters.modules_path >> --python-version "$(python --version | grep -oP "[0-9].[0-9]+")"
+  - when:
+      condition: << parameters.cache >>
+      steps:
+        - save_cache:
+            key: mypy-cache-<< checksum("requirements.txt") >>-<< checksum("<< parameters.configuration_file >>") >>-<< checksum("<< parameters.modules_path >>") >>-<< checksum("<< parameters.mypy-args >>") >>-<< checksum("<< parameters.executor >>") >>
+            paths:
+              - .mypy_cache/
