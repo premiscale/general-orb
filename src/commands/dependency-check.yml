@@ -14,7 +14,7 @@ steps:
       command: |+
         sudo apt-get update
 
-        mapfile -d "<< parameters.delimiter >>" -t dependencies < <(printf "${{ parameters.dependencies }}")
+        mapfile -d "<< parameters.delimiter >>" -t dependencies < <(printf "<< parameters.dependencies >>")
 
         for dependency in "${dependencies[@]}"; do
             if ! dpkg -l | grep -q "$dependency" &>/dev/null; then
