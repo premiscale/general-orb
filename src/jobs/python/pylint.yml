@@ -26,8 +26,19 @@ parameters:
     type: string
     description: Path to pylint configuration file
     default: .pylintrc
+  dependencies:
+    type: string
+    description: List of packages to install. (By default, this is a comma-separated string if delimiter is not specified.)
+    default: ''
+  delimiter:
+    type: string
+    description: Delimiter by which to split the dependencies string.
+    default: ','
 steps:
   - checkout
+  - dependency-check:
+      dependencies: << parameters.dependencies >>
+      delimiter: << parameters.delimiter >>
   - run:
       name: Requirements
       command: |
