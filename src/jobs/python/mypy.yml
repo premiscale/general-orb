@@ -58,9 +58,14 @@ steps:
         pip install -r requirements.txt
   - run:
       name: MyPy
-      command: |
+      command: |+
+        printf "Installing MyPy\\n"
         pip install --no-python-version-warning --disable-pip-version-check --upgrade mypy
+
+        printf "Installing MyPy types\\n"
         mypy --install-types --non-interactive || true
+
+        printf "Running MyPy\\n"
         mypy --config-file << parameters.configuration_file >> << parameters.mypy-args >> << parameters.modules_path >> --python-version "$(python --version | grep -oP "[0-9].[0-9]+")"
   - when:
       condition: << parameters.cache >>
