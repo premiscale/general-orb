@@ -29,11 +29,22 @@ parameters:
     description: Executor image to run as.
     default: python-3-10
     type: executor
+  dependencies:
+    type: string
+    description: List of packages to install. (By default, this is a comma-separated string if delimiter is not specified.)
+    default: ''
+  delimiter:
+    type: string
+    description: Delimiter by which to split the dependencies string.
+    default: ','
 steps:
   - run:
       name: Install yamale
       command: pip install yamale
   - checkout
+  - dependency-check:
+      dependencies: << parameters.dependencies >>
+      delimiter: << parameters.delimiter >>
   - run:
       name: Validate Yamale schema
       command: |

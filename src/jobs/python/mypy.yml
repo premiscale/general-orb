@@ -30,15 +30,44 @@ parameters:
     type: string
     description: Specify Additional MyPy configuration arguments / flags.
     default: ''
+  dependencies:
+    type: string
+    description: List of packages to install. (By default, this is a comma-separated string if delimiter is not specified.)
+    default: ''
+  delimiter:
+    type: string
+    description: Delimiter by which to split the dependencies string.
+    default: ','
+  cache:
+    type: boolean
+    description: Use cache for .mypy_cache/.
+    default: true
 steps:
   - checkout
+  - when:
+      condition: << parameters.cache >>
+      steps:
+        - restore_cache:
+            key: mypy-cache-{{ .Branch }}
+  - dependency-check:
+      dependencies: << parameters.dependencies >>
+      delimiter: << parameters.delimiter >>
   - run:
       name: Requirements
       command: |
         pip install -r requirements.txt
   - run:
       name: MyPy
-      command: |
+      command: |+
+        printf "Installing MyPy\\n"
         pip install --no-python-version-warning --disable-pip-version-check --upgrade mypy
-        mypy --install-types --non-interactive || true
-        mypy --config-file << parameters.configuration_file >> << parameters.mypy-args >> << parameters.modules_path >> --python-version "$(python --version | grep -oP "[0-9].[0-9]+")"
+
+        printf "Running MyPy\\n"
+        mypy --install-types --non-interactive --config-file << parameters.configuration_file >> << parameters.mypy-args >> << parameters.modules_path >> --python-version "$(python --version | grep -oP "[0-9].[0-9]+")"
+  - when:
+      condition: << parameters.cache >>
+      steps:
+        - save_cache:
+            key: mypy-cache-{{ .Branch }}
+            paths:
+              - .mypy_cache/

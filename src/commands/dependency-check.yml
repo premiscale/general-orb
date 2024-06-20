@@ -1,0 +1,24 @@
+description: Dependency Check
+parameters:
+  dependencies:
+    type: string
+    description: List of packages to install. (By default, this is a comma-separated string if delimiter is not specified.)
+    default: ''
+  delimiter:
+    type: string
+    description: Delimiter by which to split the dependencies string.
+    default: ','
+steps:
+  - run:
+      name: Check Dependencies
+      command: |+
+        sudo apt-get update
+
+        mapfile -d "<< parameters.delimiter >>" -t dependencies < <(printf "<< parameters.dependencies >>")
+
+        for dependency in "${dependencies[@]}"; do
+            if ! dpkg -l | grep -q "$dependency" &>/dev/null; then
+                printf "Installing %s\\n" "$dependency"
+                sudo apt-get install -y "$dependency"
+            fi
+        done
