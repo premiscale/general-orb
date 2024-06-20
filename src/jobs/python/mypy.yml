@@ -43,12 +43,12 @@ parameters:
     description: Use cache for .mypy_cache/.
     default: true
 steps:
+  - checkout
   - when:
       condition: << parameters.cache >>
       steps:
         - restore_cache:
             key: mypy-cache-{{ .Branch }}
-  - checkout
   - dependency-check:
       dependencies: << parameters.dependencies >>
       delimiter: << parameters.delimiter >>
