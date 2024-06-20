@@ -66,6 +66,6 @@ steps:
       condition: << parameters.cache >>
       steps:
         - save_cache:
-            key: mypy-cache-<< checksum("requirements.txt") >>-<< checksum("<< parameters.configuration_file >>") >>-<< checksum("<< parameters.modules_path >>") >>-<< checksum("<< parameters.mypy-args >>") >>-<< checksum("<< parameters.executor >>") >>
+            key: mypy-cache-<< pipeline.git.branch >>-<< checksum("requirements.txt") >>-<< checksum("<< parameters.configuration_file >>") >>-<< checksum("<< parameters.modules_path >>") >>-<< checksum("<< parameters.mypy-args >>") >>-<< checksum("<< parameters.executor >>") >>
             paths:
               - .mypy_cache/
