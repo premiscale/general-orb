@@ -94,6 +94,7 @@ steps:
       name: Configure gh CLI
       command: |+
         printf "<< parameters.token >>" | gh auth login --with-token 2>/dev/null || true
+
         gh repo set-default "<< parameters.github-organization >>"/"<< parameters.github-project-name >>"
   # This branch generates releases with both artifacts uploaded and signing-related artifacts with cosign.
   - when:
@@ -126,7 +127,7 @@ steps:
         # Generate the release and upload artifacts.
         - run:
             name: Generate release
-            command: |+
+            command: |
               gh release create "$(git tag | sort -V | tail -1)" --generate-notes --attach "<< parameters.cosign-artifacts-directory >>/*"
   # This is the typical release generation step with no artifacts (just the standard source tarballs).
   - unless:
@@ -134,5 +135,5 @@ steps:
       steps:
         - run:
             name: Generate release
-            command: |+
+            command: |
               gh release create "$(git tag | sort -V | tail -1)" --generate-notes
