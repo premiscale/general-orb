@@ -91,19 +91,8 @@ steps:
         wget https://github.com/cli/cli/releases/download/v<< parameters.gh-version >>/gh_<< parameters.gh-version >>_linux_amd64.deb -O gh.deb
         sudo dpkg -i gh.deb
   - run:
-      name: Configure git CLI
+      name: Configure gh CLI
       command: |+
-        # Get latest tag.
-        git fetch --all --tags
-
-        LATEST_TAG="$(git tag | sort -V | tail -1)"
-        export LATEST_TAG
-
-        printf "export LATEST_TAG=\"%s\"\\n" "$LATEST_TAG" >> .env
-
-        printf "Latest detected tag: %s\\n" "$LATEST_TAG"
-
-        # Generate release from tag.
         printf "<< parameters.token >>" | gh auth login --with-token 2>/dev/null || true
         gh repo set-default "<< parameters.github-organization >>"/"<< parameters.github-project-name >>"
   # This branch generates releases with both artifacts uploaded and signing-related artifacts with cosign.
@@ -138,8 +127,7 @@ steps:
         - run:
             name: Generate release
             command: |+
-              cat .env >> "$BASH_ENV"
-              gh release create "$LATEST_TAG" --generate-notes --attach "<< parameters.cosign-artifacts-directory >>/*"
+              gh release create "$(git tag | sort -V | tail -1)" --generate-notes --attach "<< parameters.cosign-artifacts-directory >>/*"
   # This is the typical release generation step with no artifacts (just the standard source tarballs).
   - unless:
       condition: << parameters.cosign >>
@@ -147,5 +135,4 @@ steps:
         - run:
             name: Generate release
             command: |+
-              cat .env >> "$BASH_ENV"
-              gh release create "$LATEST_TAG" --generate-notes
+              gh release create "$(git tag | sort -V | tail -1)" --generate-notes
