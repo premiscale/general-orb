@@ -2,7 +2,7 @@ version: 2.1
 
 
 orbs:
-  orb-tools: circleci/orb-tools@11.6.1
+  orb-tools: circleci/orb-tools@12.1.0
   general: premiscale/general@dev:af2118ae1c4d905008ac5d5daa53bd104afcc3e2
 
 
