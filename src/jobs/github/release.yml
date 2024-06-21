@@ -95,7 +95,12 @@ steps:
       command: |+
         # Get latest tag.
         git fetch --all --tags
-        export LATEST_TAG="$(git tag | sort -V | tail -1)"
+
+        LATEST_TAG="$(git tag | sort -V | tail -1)"
+        export LATEST_TAG
+
+        printf "export LATEST_TAG=\"%s\"\\n" "$LATEST_TAG" >> .env
+
         printf "Latest detected tag: %s\\n" "$LATEST_TAG"
 
         # Generate release from tag.
@@ -133,6 +138,7 @@ steps:
         - run:
             name: Generate release
             command: |+
+              cat .env >> "$BASH_ENV"
               gh release create "$LATEST_TAG" --generate-notes --attach "<< parameters.cosign-artifacts-directory >>/*"
   # This is the typical release generation step with no artifacts (just the standard source tarballs).
   - unless:
@@ -141,4 +147,5 @@ steps:
         - run:
             name: Generate release
             command: |+
+              cat .env >> "$BASH_ENV"
               gh release create "$LATEST_TAG" --generate-notes
